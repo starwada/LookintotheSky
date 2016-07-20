@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">LookintotheSky</string>
+    <string name="disptype">Air Pollution</string>
+    <string name="dispday">Day</string>
+    <string name="menu_selectstation">Select Station</string>
+    <string name="menu_help">help</string>
+    <string name="menu_share">share</string>
+    <string name="spec_KB" translatable="false">KB</string>
+    <string name="spec_MB" translatable="false">MB</string>
+    <string name="title_activity_select_station">Select Station</string>
+    <string name="PrefName">PrefName</string>
+    <string name="MonitorStation">Monitoring Station</string>
+</resources>

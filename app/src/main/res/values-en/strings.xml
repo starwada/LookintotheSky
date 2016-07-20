@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LookintotheSky</string>
+    <string name="disptype">Air Pollution</string>
+    <string name="dispday">Day</string>
+    <string name="menu_selectstation">Select Station</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_share">Share</string>
+    <string name="title_activity_select_station">Select Station</string>
+    <string name="PrefName">PrefName</string>
+    <string name="MonitorStation">Monitoring Station</string>
+</resources>

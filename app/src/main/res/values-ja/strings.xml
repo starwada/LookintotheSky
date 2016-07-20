@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">空見てごらん</string>
+    <string name="disptype">大気汚染物質</string>
+    <string name="dispday">表示日数</string>
+    <string name="menu_selectstation">測定局選択</string>
+    <string name="menu_help">操作説明</string>
+    <string name="menu_share">共有</string>
+    <string name="title_activity_select_station">測定局選択</string>
+    <string name="PrefName">都道府県</string>
+    <string name="MonitorStation">測定局名</string>
+</resources>
