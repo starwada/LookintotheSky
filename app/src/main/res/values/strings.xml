@@ -10,4 +10,6 @@
     <string name="title_activity_select_station">Select Station</string>
     <string name="PrefName">PrefName</string>
     <string name="MonitorStation">Monitoring Station</string>
+    <string name="configure">Setting Widget</string>
+    <string name="appwidget_text" translatable="false">PM2.5</string>
 </resources>

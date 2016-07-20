@@ -9,4 +9,5 @@
     <string name="title_activity_select_station">測定局選択</string>
     <string name="PrefName">都道府県</string>
     <string name="MonitorStation">測定局名</string>
+    <string name="configure">ウィジット設定</string>
 </resources>

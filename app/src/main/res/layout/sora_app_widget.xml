@@ -1,0 +1,51 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:padding="@dimen/widget_margin" android:background="@android:color/transparent">
+
+
+    <ImageView
+        android:id="@+id/appwidget_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/appwidget_preview"/>
+        <!--
+        android:foregroundGravity="top"/>
+        -->
+    <TextView
+        android:id="@+id/appwidget_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="@string/appwidget_text"
+        android:textColor="#ffffff"
+        android:textSize="48sp"
+        android:layout_margin="8dp"
+        android:contentDescription="@string/appwidget_text"
+        android:background="@android:color/transparent" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/shareButton"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:background="@android:color/transparent"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/updateButton"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:layout_marginTop="38dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:background="@android:color/transparent"/>
+
+</RelativeLayout>
