@@ -32,8 +32,8 @@
         android:layout_toEndOf="@+id/title_text"
         android:spinnerMode="dropdown" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <ListView
+        android:id="@+id/MonitorStation_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title_text"

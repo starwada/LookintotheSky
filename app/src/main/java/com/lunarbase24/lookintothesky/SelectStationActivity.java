@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 
 import org.jsoup.Jsoup;
@@ -461,20 +462,11 @@ public class SelectStationActivity extends AppCompatActivity {
         {
             if( mDb.isOpen()){ mDb.close(); }
             // 測定局データ取得後にリスト表示
-            mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-            if(mList != null && mRecyclerView != null)
+            ListView station = (ListView) findViewById(R.id.MonitorStation_selview);
+            if(mList != null && station != null)
             {
-                mAdapter = mRecyclerView.getAdapter();
-                if( mAdapter != null ){
-                    mAdapter = null;
-                }
-                mAdapter = new SoramameStationAdapter(SelectStationActivity.this, mList);
-
-                mLayoutManager = new LinearLayoutManager(SelectStationActivity.this);
-                mRecyclerView.setLayoutManager(mLayoutManager);
-//        mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
-                mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-                mRecyclerView.setAdapter(mAdapter);
+                MonitoringStationAdapter Adapter = new MonitoringStationAdapter(SelectStationActivity.this, mList, true);
+                station.setAdapter(Adapter);
             }
             mProgressDialog.dismiss();
         }

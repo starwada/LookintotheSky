@@ -123,7 +123,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
         // 都道府県取得
         new PrefSpinner().execute();
 
-        ListView station = (ListView)findViewById(R.id.recycler_view);
+        ListView station = (ListView)findViewById(R.id.MonitorStation_view);
         station.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -454,15 +454,10 @@ public class SoraAppWidgetConfigureActivity extends Activity {
         {
             if( mDb.isOpen()){ mDb.close(); }
             // 測定局データ取得後にリスト表示
-            RecyclerView station = (RecyclerView) findViewById(R.id.recycler_view);
+            ListView station = (ListView) findViewById(R.id.MonitorStation_view);
             if(mList != null && station != null)
             {
-                SoramameStationAdapter Adapter = new SoramameStationAdapter(SoraAppWidgetConfigureActivity.this, mList);
-
-                RecyclerView.LayoutManager LayoutManager = new LinearLayoutManager(SoraAppWidgetConfigureActivity.this);
-                station.setLayoutManager(LayoutManager);
-//        mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
-                station.setItemAnimator(new DefaultItemAnimator());
+                MonitoringStationAdapter Adapter = new MonitoringStationAdapter(SoraAppWidgetConfigureActivity.this, mList, false);
                 station.setAdapter(Adapter);
             }
             mProgressDialog.dismiss();
