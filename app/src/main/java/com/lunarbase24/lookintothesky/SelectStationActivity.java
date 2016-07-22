@@ -49,9 +49,6 @@ import java.util.Locale;
  * メイン画面で表示する測定局（コード）はファイルに保持しておく
  */
 public class SelectStationActivity extends AppCompatActivity {
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private static final String SORAPREFFILE = "SoraPrefFile";
@@ -62,9 +59,6 @@ public class SelectStationActivity extends AppCompatActivity {
     // 指定都道府県の測定局一覧取得
     private static final String SORAPREFURL ="MstItiranFrame.php?Pref=";
 
-    ProgressDialog mProgressDialog;
-    String m_strMstURL;     // 測定局のURL
-    private Soramame mSoramame;
     ArrayList<Soramame> mList;
     int mPref ;                     // 都道府県コード
 
@@ -330,6 +324,7 @@ public class SelectStationActivity extends AppCompatActivity {
         String strOX;           // OX
         String strPM25;     // PM2.5
         String strWD;       // 風向
+        ProgressDialog mProgressDialog;
 
         SoramameSQLHelper mDbHelper = new SoramameSQLHelper(SelectStationActivity.this);
         SQLiteDatabase mDb = null;

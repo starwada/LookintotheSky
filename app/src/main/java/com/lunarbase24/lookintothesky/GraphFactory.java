@@ -18,6 +18,7 @@ import java.util.Locale;
 
 /**
  * Created by Wada on 2016/06/27.
+ * ウィジットの画像用
  */
 public class GraphFactory {
 

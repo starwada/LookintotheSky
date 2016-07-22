@@ -14,4 +14,16 @@
     <string name="appwidget_text" translatable="false">PM2.5</string>
     <string name="CurrentType" translatable="false">CurrentType</string>
     <string name="CurrentDay" translatable="false">CurrentDay</string>
+    <string name="CurrentPref" translatable="false">CurrentPref</string>
+    <string name="day1">1 day</string>
+    <string name="day2">2 days</string>
+    <string name="day3">3 days</string>
+    <string name="day4">4 days</string>
+    <string name="day5">5 days</string>
+    <string name="day6">6 days</string>
+    <string name="day7">7 days</string>
+    <string name="daymax">max</string>
+    <string name="datatype_PM25" translatable="false">PM2.5</string>
+    <string name="datatype_OX">OX</string>
+    <string name="datatype_WS">WS</string>
 </resources>

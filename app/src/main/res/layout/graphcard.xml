@@ -72,7 +72,7 @@
                 android:layout_below="@+id/soragraph"
                 android:text="TextView"
                 android:textSize="18sp"
-                android:layout_toRightOf="@+id/soramax" />
+                android:layout_toRightOf="@+id/soraave" />
 
             <TextView
                 android:id="@+id/hour"

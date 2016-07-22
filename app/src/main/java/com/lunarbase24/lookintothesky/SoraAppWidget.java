@@ -394,6 +394,5 @@ public class SoraAppWidget extends AppWidgetProvider {
 //        onUpdate(context, manager, appWidgetIds);
 //    }
 
-
 }
 

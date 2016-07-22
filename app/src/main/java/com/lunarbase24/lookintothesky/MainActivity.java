@@ -152,8 +152,8 @@ public class MainActivity extends AppCompatActivity {
         // スピナーのインデックスを保持
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("@string/CurrentType", mCurrentType);
-        editor.putInt("@string/CurrentDay", mCurrentDay);
+        editor.putInt("CurrentType", mCurrentType);
+        editor.putInt("CurrentDay", mCurrentDay);
         editor.apply();
 
         super.onPause();
@@ -207,14 +207,14 @@ public class MainActivity extends AppCompatActivity {
     // 表示データ種別および日数のスピナー設定
     private void SetSpinner() {
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        mCurrentType = sharedPref.getInt("@string/CurrentType", 0);
-        mCurrentDay = sharedPref.getInt("@string/CurrentDay", 3);
+        mCurrentType = sharedPref.getInt("CurrentType", 0);
+        mCurrentDay = sharedPref.getInt("CurrentDay", 3);
 
         try {
             ArrayList<String> dataList = new ArrayList<String>();
-            dataList.add("PM2.5");
-            dataList.add("OX(光化学オキシダント)");
-            dataList.add("WS(風速)");
+            dataList.add(getString(R.string.datatype_PM25));
+            dataList.add(getString(R.string.datatype_OX));
+            dataList.add(getString(R.string.datatype_WS));
             ArrayAdapter<String> pref = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, dataList);
             pref.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             // スピナーリスト設定
@@ -225,14 +225,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             ArrayList<String> dayList = new ArrayList<String>();
-            dayList.add("１日");
-            dayList.add("２日");
-            dayList.add("３日");
-            dayList.add("４日");
-            dayList.add("５日");
-            dayList.add("６日");
-            dayList.add("７日");
-            dayList.add("最大");
+            dayList.add(getString(R.string.day1));
+            dayList.add(getString(R.string.day2));
+            dayList.add(getString(R.string.day3));
+            dayList.add(getString(R.string.day4));
+            dayList.add(getString(R.string.day5));
+            dayList.add(getString(R.string.day6));
+            dayList.add(getString(R.string.day7));
+            dayList.add(getString(R.string.daymax));
             ArrayAdapter<String> day = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, dayList);
             day.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             // スピナーリスト設定

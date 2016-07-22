@@ -10,4 +10,14 @@
     <string name="PrefName">都道府県</string>
     <string name="MonitorStation">測定局名</string>
     <string name="configure">ウィジット設定</string>
+    <string name="day1">１日</string>
+    <string name="day2">２日</string>
+    <string name="day3">３日</string>
+    <string name="day4">４日</string>
+    <string name="day5">５日</string>
+    <string name="day6">６日</string>
+    <string name="day7">７日</string>
+    <string name="daymax">最大</string>
+    <string name="datatype_WS">風速</string>
+    <string name="datatype_OX">光化学オキシダント</string>
 </resources>

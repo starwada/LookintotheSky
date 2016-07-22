@@ -45,7 +45,6 @@ import java.util.Locale;
 public class SoraAppWidgetConfigureActivity extends Activity {
 
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetText;
     private static final String PREFS_NAME = "com.example.wada.myapplication.SoraAppWidget";
     private static final String PREF_PREFIX_KEY = "appwidget_";
     private static final String PREF_MSTCODE_KEY = "mstcode_";
@@ -58,12 +57,9 @@ public class SoraAppWidgetConfigureActivity extends Activity {
     private static final String SORAPREFURL ="MstItiranFrame.php?Pref=";
     private static final String ACTION_START_MY_ALARM = "com.example.wada.myapplication.ACTION_START_MY_ALARM";
 
-    ProgressDialog mProgressDialog;
-    String m_strMstURL;     // 測定局のURL
     int mPref ;                     // 都道府県コード
     private Soramame mSoramame;
 
-    private SoramameStationAdapter mAdapter;
     ArrayList<Soramame> mList;
 
     public SoraAppWidgetConfigureActivity() {
@@ -79,9 +75,6 @@ public class SoraAppWidgetConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.sora_app_widget_configure);
-//        mAppWidgetText = (EditText) findViewById(R.id.appwidget_text);
-//        // ボタンにクリックリスナーを設定
-//        findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
 
         // Find the widget id from the intent.
         Intent intent = getIntent();
@@ -96,9 +89,6 @@ public class SoraAppWidgetConfigureActivity extends Activity {
             finish();
             return;
         }
-
-        // エディットにテキストの初期値を設定
-//        mAppWidgetText.setText(loadTitlePref(SoraAppWidgetConfigureActivity.this, mAppWidgetId));
 
         mPref = 0;
         // 都道府県インデックスを取得
@@ -324,6 +314,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
         String strOX;           // OX
         String strPM25;     // PM2.5
         String strWD;       // 風向
+        ProgressDialog mProgressDialog;
 
         SoramameSQLHelper mDbHelper = new SoramameSQLHelper(SoraAppWidgetConfigureActivity.this);
         SQLiteDatabase mDb = null;

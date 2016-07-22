@@ -10,4 +10,14 @@
     <string name="PrefName">PrefName</string>
     <string name="MonitorStation">Monitoring Station</string>
     <string name="configure">Setting Widget</string>
+    <string name="day1">1 day</string>
+    <string name="day2">2 days</string>
+    <string name="day3">3 days</string>
+    <string name="day4">4 days</string>
+    <string name="day5">5 days</string>
+    <string name="day6">6 days</string>
+    <string name="day7">7 days</string>
+    <string name="daymax">max</string>
+    <string name="datatype_WS">Wind Speed</string>
+    <string name="datatype_OX">Photochemical oxidant</string>
 </resources>
