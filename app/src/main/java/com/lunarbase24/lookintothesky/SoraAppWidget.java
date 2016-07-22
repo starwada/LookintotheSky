@@ -231,17 +231,17 @@ public class SoraAppWidget extends AppWidgetProvider {
                 int appWidgetIds[] = manager.getAppWidgetIds(thisWidget);
 
                 // デバッグ用コード 呼ばれるタイミングを出力
-                Date now = new Date();
-                // MODE_APPENDにて既存ファイルの場合追加
-                FileOutputStream outfile = openFileOutput(SORADATEFILE, Context.MODE_APPEND);
-                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
-                outfile.close();
+//                Date now = new Date();
+//                // MODE_APPENDにて既存ファイルの場合追加
+//                FileOutputStream outfile = openFileOutput(SORADATEFILE, Context.MODE_APPEND);
+//                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
+//                outfile.close();
 
                 final int N = appWidgetIds.length;
                 for (int i = 0; i < N; i++) {
                     new SoraDesc().execute(appWidgetIds[i]);
                 }
-            }catch(IOException e){
+            }catch(Exception e){
                 e.printStackTrace();
             }
 

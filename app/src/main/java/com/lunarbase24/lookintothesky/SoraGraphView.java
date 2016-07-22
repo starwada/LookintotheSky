@@ -319,7 +319,7 @@ public class SoraGraphView extends View {
         MainActivity act = (MainActivity) getContext();
         if(act != null) {
             String strMode;
-            strMode = String.format("(%s):", mMode == 0 ? "PM2.5" : (mMode == 1 ? "光化学オキシダント" : "風速"));
+            strMode = String.format("(%s):", mMode == 0 ? act.getString(R.string.datatype_PM25) : (mMode == 1 ? act.getString(R.string.datatype_OX) : act.getString(R.string.datatype_WS)));
             act.setShareIntent(mstrValue + strMode + mSoramame.getMstName());
         }
     }
