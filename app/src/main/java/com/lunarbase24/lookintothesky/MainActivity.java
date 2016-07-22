@@ -152,8 +152,8 @@ public class MainActivity extends AppCompatActivity {
         // スピナーのインデックスを保持
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("CurrentType", mCurrentType);
-        editor.putInt("CurrentDay", mCurrentDay);
+        editor.putInt("@string/CurrentType", mCurrentType);
+        editor.putInt("@string/CurrentDay", mCurrentDay);
         editor.apply();
 
         super.onPause();
@@ -207,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
     // 表示データ種別および日数のスピナー設定
     private void SetSpinner() {
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        mCurrentType = sharedPref.getInt("CurrentType", 0);
-        mCurrentDay = sharedPref.getInt("CurrentDay", 3);
+        mCurrentType = sharedPref.getInt("@string/CurrentType", 0);
+        mCurrentDay = sharedPref.getInt("@string/CurrentDay", 3);
 
         try {
             ArrayList<String> dataList = new ArrayList<String>();

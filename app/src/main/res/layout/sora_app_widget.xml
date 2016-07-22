@@ -1,7 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:padding="@dimen/widget_margin" android:background="@android:color/transparent">
-
+    android:background="@android:color/transparent">
+<!-- paddingを設定していると、当然画像が小さくなる。
+しかし、SDKVersionやMinVersionにも影響されるようだ。
+つまり、paddingが効かないこともある。なので、paddingを外した。
+2016/07/22-->
 
     <ImageView
         android:id="@+id/appwidget_image"
