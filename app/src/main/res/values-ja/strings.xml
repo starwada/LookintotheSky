@@ -20,4 +20,5 @@
     <string name="daymax">最大</string>
     <string name="datatype_WS">風速</string>
     <string name="datatype_OX">光化学オキシダント</string>
+    <string name="menu_setting">設定</string>
 </resources>

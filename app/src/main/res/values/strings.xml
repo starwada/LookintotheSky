@@ -10,7 +10,7 @@
     <string name="title_activity_select_station">Select Station</string>
     <string name="PrefName">PrefName</string>
     <string name="MonitorStation">Monitoring Station</string>
-    <string name="configure">Setting Widget</string>
+    <string name="configure">Widget Settings</string>
     <string name="appwidget_text" translatable="false">PM2.5</string>
     <string name="CurrentType" translatable="false">CurrentType</string>
     <string name="CurrentDay" translatable="false">CurrentDay</string>
@@ -26,4 +26,5 @@
     <string name="datatype_PM25" translatable="false">PM2.5</string>
     <string name="datatype_OX">OX</string>
     <string name="datatype_WS">WS</string>
+    <string name="menu_setting">Setting</string>
 </resources>

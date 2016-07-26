@@ -120,6 +120,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_selectstation:
                 SelectStation();
                 break;
+            // 設定
+            case R.id.menu_setting:
+                Setting();
+                break;
             // 操作説明
             case R.id.menu_help:
                 Intent intent = new Intent(MainActivity.this, HelpActivity.class);
@@ -297,6 +301,12 @@ public class MainActivity extends AppCompatActivity {
     // 測定局選択アクティビティ
     private void SelectStation() {
         Intent intent = new Intent(MainActivity.this, SelectStationActivity.class);
+        startActivity(intent);
+    }
+
+    // 設定アクティビティ
+    private void Setting(){
+        Intent intent = new Intent(MainActivity.this, SettingActivity.class);
         startActivity(intent);
     }
 

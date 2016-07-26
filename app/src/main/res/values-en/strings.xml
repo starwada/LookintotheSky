@@ -9,7 +9,7 @@
     <string name="title_activity_select_station">Select Station</string>
     <string name="PrefName">PrefName</string>
     <string name="MonitorStation">Monitoring Station</string>
-    <string name="configure">Setting Widget</string>
+    <string name="configure">Widget Settings</string>
     <string name="day1">1 day</string>
     <string name="day2">2 days</string>
     <string name="day3">3 days</string>
@@ -20,4 +20,5 @@
     <string name="daymax">max</string>
     <string name="datatype_WS">Wind Speed</string>
     <string name="datatype_OX">Photochemical oxidant</string>
+    <string name="menu_setting">Settings</string>
 </resources>
