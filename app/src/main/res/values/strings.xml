@@ -27,4 +27,9 @@
     <string name="datatype_OX">OX</string>
     <string name="datatype_WS">WS</string>
     <string name="menu_setting">Setting</string>
+    <string name="disphour">Display Hours</string>
+    <string name="updatetime">Update Time</string>
+    <string name="graph">graph</string>
+    <string name="graph_back">graph back</string>
+    <string name="graph_radius">graph radius</string>
 </resources>

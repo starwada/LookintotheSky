@@ -45,7 +45,7 @@ import java.util.Locale;
 public class SoraAppWidgetConfigureActivity extends Activity {
 
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    private static final String PREFS_NAME = "com.example.wada.myapplication.SoraAppWidget";
+    private static final String PREFS_NAME = "com.lunarbase24.lookintothesky.SoraAppWidget";
     private static final String PREF_PREFIX_KEY = "appwidget_";
     private static final String PREF_MSTCODE_KEY = "mstcode_";
     private static final String SORAPREFFILE = "SoraPrefFile";
@@ -55,7 +55,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
     private static final String SORADATAURL = "DataList.php?MstCode=";
     // 指定都道府県の測定局一覧取得
     private static final String SORAPREFURL ="MstItiranFrame.php?Pref=";
-    private static final String ACTION_START_MY_ALARM = "com.example.wada.myapplication.ACTION_START_MY_ALARM";
+    private static final String ACTION_START_MY_ALARM = "com.lunarbase24.lookintothesky.ACTION_START_MY_ALARM";
 
     int mPref ;                     // 都道府県コード
     private Soramame mSoramame;

@@ -21,4 +21,9 @@
     <string name="datatype_WS">風速</string>
     <string name="datatype_OX">光化学オキシダント</string>
     <string name="menu_setting">設定</string>
+    <string name="disphour">表示時間</string>
+    <string name="updatetime">更新時間</string>
+    <string name="graph">グラフ関連</string>
+    <string name="graph_back">背景透過率</string>
+    <string name="graph_radius">半径</string>
 </resources>

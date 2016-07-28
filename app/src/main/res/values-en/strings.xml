@@ -21,4 +21,9 @@
     <string name="datatype_WS">Wind Speed</string>
     <string name="datatype_OX">Photochemical oxidant</string>
     <string name="menu_setting">Settings</string>
+    <string name="disphour">Display Hours</string>
+    <string name="updatetime">Update Time</string>
+    <string name="graph">Graph</string>
+    <string name="graph_back">Transparency</string>
+    <string name="graph_radius">Radius</string>
 </resources>

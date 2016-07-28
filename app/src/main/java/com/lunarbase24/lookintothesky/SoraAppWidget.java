@@ -41,12 +41,14 @@ import java.util.Locale;
  * 測定結果のウィジットなので、１時間毎に更新させる。
  * タイマーを使用してみたが、うまく動作しなかった。途中でタイマーが止まってしまった（使い方が悪いのだろうが）。
  * タイマーのコードは残しておく。
+ * 端末が再起動した際に、ウィジットの表示がおかしくなっていた（というか、基本の画像にTextViewが張り付いているだけ）。
+ * つまり、再起動時に当然、ウィジットも更新しないといけない。onUpdate()が呼ばれる。
  */
 public class SoraAppWidget extends AppWidgetProvider {
 //    private static Timer timer;
     private static int nCount=0;
-    private static final String ACTION_START_MY_ALARM = "com.example.wada.myapplication.ACTION_START_MY_ALARM";
-    private static final String ACTION_START_SHARE = "com.example.wada.myapplication.ACTION_START_SHARE";
+    private static final String ACTION_START_MY_ALARM = "com.lunarbase24.lookintothesky.ACTION_START_MY_ALARM";
+    private static final String ACTION_START_SHARE = "com.lunarbase24.lookintothesky.ACTION_START_SHARE";
     private final long interval = 60 * 60 * 1000;
     private final long alarmtime = 30 * 60 * 1000;  // アラーム設定分
 
@@ -63,6 +65,7 @@ public class SoraAppWidget extends AppWidgetProvider {
     // 以下はシステムのタイミングで呼ばれる
     // 最初、ウィジットを画面に配置する際に設定アクティビティよりも先に呼ばれる。
     // 後は、システムのタイミング
+    // 再起動時にも呼ばれる。
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
@@ -70,10 +73,6 @@ public class SoraAppWidget extends AppWidgetProvider {
 //        for (int i = 0; i < N; i++) {
 //            updateAppWidget(context, appWidgetManager, appWidgetIds[i]);
 //        }
-//        Intent serviceIntent = new Intent(context, MyService.class);
-//        context.startService(serviceIntent);
-        // アラーム設定
-//        setAlarm(context);
     }
 
     @Override
@@ -181,6 +180,7 @@ public class SoraAppWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, image);
     }
 
+    // 最初にここが呼ばれる。
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
@@ -189,11 +189,12 @@ public class SoraAppWidget extends AppWidgetProvider {
         //context.getResources().getConfiguration().orientation
         // 回転の状態（縦、横）に応じてウィジットの配置設定を修正する
         // アラーム受信
-        if (intent.getAction().equals(ACTION_START_MY_ALARM)) {
-            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
+        if (intent.getAction().equals(ACTION_START_MY_ALARM) ||
+                intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+//            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
                 Intent serviceIntent = new Intent(context, MyService.class);
                 context.startService(serviceIntent);
-            }
+//            }
             setAlarm(context);
         }
         // 共有受信
@@ -325,6 +326,7 @@ public class SoraAppWidget extends AppWidgetProvider {
             @Override
             protected void onPostExecute(Integer result)
             {
+                if(mDb != null && mDb.isOpen()){ mDb.close(); }
                 if(result < 0){ return ; }
                 Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId);
                 // ここでウィジット更新
@@ -334,7 +336,9 @@ public class SoraAppWidget extends AppWidgetProvider {
         }
 
         // soramame 測定局データ
+        // nCode 測定局コード
         // db DB
+        // station 測定局名/測定局所在地
         // 返り値：0    正常終了/1　DBに指定測定局データが無い（サイトからデータを取得する）
         private int checkDB(int nCode, SQLiteDatabase db, String station[]) {
             int rc = 0;
