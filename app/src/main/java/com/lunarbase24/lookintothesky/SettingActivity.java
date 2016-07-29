@@ -4,9 +4,16 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
+import android.widget.Spinner;
+
+import java.util.ArrayList;
 
 /*
     設定（セッティング）アクティビティ
@@ -17,29 +24,13 @@ import android.widget.SeekBar;
     グラフ関連：背景の透過率？グラフ丸の半径
  */
 public class SettingActivity extends AppCompatActivity {
-    class GraphSettings{
-        int m_nDataType;        // データ種別 0 PM2.5/1 OX
-        int m_nDispHour;        // 表示時間 6～12時間
-        int m_nUpdateTime;  // 更新時間 分
-        int m_nTransp;        // グラフ背景透過率 0～255
-        float m_fRadius;        // グラフ丸の半径
-
-        void GraphSettings(){
-            m_nDataType = 0;
-            m_nDispHour = 12;
-            m_nUpdateTime = 15;
-            m_nTransp = 128;
-            m_fRadius = 8.0f;
-        }
-    }
-
-    private GraphSettings m_settings;
+    private AppSettings m_settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-        m_settings = new GraphSettings();
+        m_settings = (AppSettings)this.getApplication();
 
         try {
             Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -53,32 +44,69 @@ public class SettingActivity extends AppCompatActivity {
 
             RadioButton button = (RadioButton)findViewById(R.id.radioButton);
             button.setChecked(true);
-
-            // 表示時間ピッカー
-            NumberPicker DispHour = (NumberPicker)findViewById(R.id.numberPicker);
-            DispHour.setMinValue(6);
-            DispHour.setMaxValue(12);
-            DispHour.setValue(12);
-            DispHour.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-            DispHour.setFormatter(new NumberPicker.Formatter(){
+            RadioGroup buttons = (RadioGroup)findViewById(R.id.radioGroup);
+            buttons.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
-                public String format(int i) {
-                    return String.format("%d", i);
+                public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                    if( i < 0 ){ return ; }
+                    if( i == R.id.radioButton ){
+                        m_settings.m_nDataType = 0;
+                    }
+                    else if(i == R.id.radioButton2){
+                        m_settings.m_nDataType = 1;
+                    }
                 }
             });
 
-            // 更新時間ピッカー
-            NumberPicker UpdateTime = (NumberPicker)findViewById(R.id.numberPicker2);
-            UpdateTime.setMinValue(0);
-            UpdateTime.setMaxValue(11);
-            UpdateTime.setValue(15);
-            UpdateTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-            UpdateTime.setFormatter(new NumberPicker.Formatter(){
-                @Override
-                public String format(int i) {
-                    return String.format("%02d", i*5);
-                }
-            });
+            // 表示時間スピナー
+            ArrayList<String> dataList = new ArrayList<String>();
+            for(int i=0; i<7; i++){
+                dataList.add(String.format("%d 時間", i+6));
+            }
+            ArrayAdapter<String> hour = new ArrayAdapter<String>(SettingActivity.this, android.R.layout.simple_spinner_item, dataList);
+            hour.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // スピナーリスト設定
+            Spinner DispHour = (Spinner) findViewById(R.id.DispHourSpinner);
+            if (DispHour != null) {
+                DispHour.setAdapter(hour);
+                DispHour.setSelection(m_settings.DispHourIndex());
+                DispHour.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        m_settings.m_nDispHour = i+6;
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+            }
+
+            // 更新時間スピナー
+            ArrayList<String> updateList = new ArrayList<String>();
+            for(int i=0; i<12; i++){
+                updateList.add(String.format("%d 分", i*5));
+            }
+            ArrayAdapter<String> updatetime = new ArrayAdapter<String>(SettingActivity.this, android.R.layout.simple_spinner_item, updateList);
+            updatetime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // スピナーリスト設定
+            Spinner UpdateTimeSpinner = (Spinner) findViewById(R.id.UpdateTimeSpinner);
+            if (UpdateTimeSpinner != null) {
+                UpdateTimeSpinner.setAdapter(updatetime);
+                UpdateTimeSpinner.setSelection(m_settings.UpdateTimeIndex());
+                UpdateTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        m_settings.m_nUpdateTime = i*5;
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+            }
 
             SeekBar trans = (SeekBar)findViewById(R.id.seekBar);
             trans.setMax(255);
@@ -87,5 +115,13 @@ public class SettingActivity extends AppCompatActivity {
         }catch(NullPointerException e){
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        // 画面の設定を取得
+        // 表示データ種別
+
+        super.onPause();
     }
 }

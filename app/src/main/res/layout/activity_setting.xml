@@ -26,6 +26,7 @@
         android:id="@+id/textView" />
 
     <RadioGroup
+        android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -56,10 +57,10 @@
         android:text="@string/disphour"
         android:id="@+id/textView3" />
 
-    <NumberPicker
+    <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/numberPicker"
+        android:id="@+id/DispHourSpinner"
         android:layout_gravity="center_horizontal" />
 
     <TextView
@@ -69,10 +70,10 @@
         android:text="@string/updatetime"
         android:id="@+id/textView4" />
 
-    <NumberPicker
+    <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/numberPicker2"
+        android:id="@+id/UpdateTimeSpinner"
         android:layout_gravity="center_horizontal" />
 
     <TextView

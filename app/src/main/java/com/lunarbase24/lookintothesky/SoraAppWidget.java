@@ -188,9 +188,10 @@ public class SoraAppWidget extends AppWidgetProvider {
         // 以下で回転の状態を取得する。
         //context.getResources().getConfiguration().orientation
         // 回転の状態（縦、横）に応じてウィジットの配置設定を修正する
-        // アラーム受信
+        // アラーム受信 更新処理（onUpdateでなくここで処理をする、アラーム処理と内容が同じなので）
         if (intent.getAction().equals(ACTION_START_MY_ALARM) ||
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+// Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
                 Intent serviceIntent = new Intent(context, MyService.class);
                 context.startService(serviceIntent);
@@ -287,6 +288,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                     if( checkDB(nCode, mDb, station) < 1 ){ return -3; }
                     soramame = new Soramame(nCode, station[0], station[1]);
 
+                    // ここは、DBから取得も想定する
                     String url = String.format(Locale.ENGLISH, "%s%s%d", SORABASEURL, SORADATAURL, nCode);
                     Document doc = Jsoup.connect(url).get();
                     Elements elements = doc.getElementsByAttributeValue("name", "Hyou");
@@ -328,6 +330,12 @@ public class SoraAppWidget extends AppWidgetProvider {
             {
                 if(mDb != null && mDb.isOpen()){ mDb.close(); }
                 if(result < 0){ return ; }
+
+                // こうすると、更新する度に新しい設定で作成される。
+                // 表示時間と更新時間はいいけど、データ種別が変わってしまう。
+                // ウィジット毎に設定を・・・
+                // つまり、データ種別はウィジット作成時に決定する。
+                AppSettings settings = (AppSettings)MyService.this.getApplication();
                 Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId);
                 // ここでウィジット更新
                 AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
