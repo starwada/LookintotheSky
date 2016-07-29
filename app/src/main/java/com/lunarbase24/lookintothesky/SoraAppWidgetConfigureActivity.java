@@ -22,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import org.jsoup.Jsoup;
@@ -61,6 +63,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
     private Soramame mSoramame;
 
     ArrayList<Soramame> mList;
+    int nDataType = 0;
 
     public SoraAppWidgetConfigureActivity() {
         super();
@@ -89,6 +92,22 @@ public class SoraAppWidgetConfigureActivity extends Activity {
             finish();
             return;
         }
+
+        RadioButton button = (RadioButton)findViewById(R.id.radioButton);
+        button.setChecked(true);
+        RadioGroup buttons = (RadioGroup)findViewById(R.id.radioGroup);
+        buttons.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                if( i < 0 ){ return ; }
+                if( i == R.id.radioButton ){
+                    nDataType = 0;
+                }
+                else if(i == R.id.radioButton2){
+                    nDataType = 1;
+                }
+            }
+        });
 
         mPref = 0;
         // 都道府県インデックスを取得
@@ -126,6 +145,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
 //                    context.startService(serviceIntent);
                     Intent alarmIntent = new Intent(context, SoraAppWidget.class);
                     alarmIntent.setAction(ACTION_START_MY_ALARM);
+                    alarmIntent.putExtra("DataType", nDataType);
                     PendingIntent operation = PendingIntent.getBroadcast(context, mAppWidgetId, alarmIntent, 0);
                     AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
                     am.set(AlarmManager.RTC, 0, operation);

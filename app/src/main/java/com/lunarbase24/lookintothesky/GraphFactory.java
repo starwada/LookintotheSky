@@ -24,7 +24,7 @@ public class GraphFactory {
 
     // 以下を引数とする。
     // グラフ背景の透過率、表示時間、表示データ種別
-    static public Bitmap drawGraph(Soramame soramame, int appWidgetId){
+    static public Bitmap drawGraph(Soramame soramame, int appWidgetId, int nType){
         int rc =0;
         TextPaint mTextPaint;
         Paint mBack;
@@ -51,7 +51,7 @@ public class GraphFactory {
         mDot.setColor(Color.argb(255, 255, 0, 0));
         mDot.setStrokeWidth(2);
         mRect = new RectF();
-        mMode = 0;
+        mMode = nType;
         mDispDay = 1;
         // OX用のペイント情報
         mOX = new Paint();

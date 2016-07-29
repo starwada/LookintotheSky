@@ -194,6 +194,7 @@ public class SoraAppWidget extends AppWidgetProvider {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
                 Intent serviceIntent = new Intent(context, MyService.class);
+            serviceIntent.putExtra("DataType", intent.getIntExtra("DataType", 0));
                 context.startService(serviceIntent);
 //            }
             setAlarm(context);
@@ -239,9 +240,10 @@ public class SoraAppWidget extends AppWidgetProvider {
 //                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
 //                outfile.close();
 
+                int Type = intent.getIntExtra("DataType", 0);
                 final int N = appWidgetIds.length;
                 for (int i = 0; i < N; i++) {
-                    new SoraDesc().execute(appWidgetIds[i]);
+                    new SoraDesc().execute(appWidgetIds[i], Type);
                 }
             }catch(Exception e){
                 e.printStackTrace();
@@ -259,6 +261,7 @@ public class SoraAppWidget extends AppWidgetProvider {
         {
             int count = 0;
             int appWidgetId = 0;
+            int nType = 0;
             Soramame soramame = null;
             SoramameSQLHelper mDbHelper = new SoramameSQLHelper(MyService.this);
             SQLiteDatabase mDb = null;
@@ -275,6 +278,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                 {
                     String strMstURL = "";
                     appWidgetId = appWidgetIds[0];
+                    nType = appWidgetIds[1];
                     // 測定局コード取得
                     int nCode = SoraAppWidgetConfigureActivity.loadPref(MyService.this, appWidgetId);
                     if(nCode == 0){ return -1; }
@@ -336,7 +340,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                 // ウィジット毎に設定を・・・
                 // つまり、データ種別はウィジット作成時に決定する。
                 AppSettings settings = (AppSettings)MyService.this.getApplication();
-                Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId);
+                Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType);
                 // ここでウィジット更新
                 AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
                 updateAppWidget(MyService.this, manager, appWidgetId, soramame);

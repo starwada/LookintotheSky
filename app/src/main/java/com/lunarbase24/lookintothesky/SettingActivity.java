@@ -42,21 +42,6 @@ public class SettingActivity extends AppCompatActivity {
             // Enable the Up button
             ab.setDisplayHomeAsUpEnabled(true);
 
-            RadioButton button = (RadioButton)findViewById(R.id.radioButton);
-            button.setChecked(true);
-            RadioGroup buttons = (RadioGroup)findViewById(R.id.radioGroup);
-            buttons.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                    if( i < 0 ){ return ; }
-                    if( i == R.id.radioButton ){
-                        m_settings.m_nDataType = 0;
-                    }
-                    else if(i == R.id.radioButton2){
-                        m_settings.m_nDataType = 1;
-                    }
-                }
-            });
 
             // 表示時間スピナー
             ArrayList<String> dataList = new ArrayList<String>();

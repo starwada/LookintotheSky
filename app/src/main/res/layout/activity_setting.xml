@@ -25,31 +25,6 @@
         android:text="@string/configure"
         android:id="@+id/textView" />
 
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/disptype"
-            android:id="@+id/textView2" />
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/datatype_PM25"
-            android:id="@+id/radioButton" />
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/datatype_OX"
-            android:id="@+id/radioButton2" />
-    </RadioGroup>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
