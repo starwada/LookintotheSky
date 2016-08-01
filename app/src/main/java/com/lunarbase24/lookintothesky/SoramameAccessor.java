@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,31 +34,107 @@ public class SoramameAccessor {
     // 指定都道府県の測定局一覧取得
     private static final String SORAPREFURL ="MstItiranFrame.php?Pref=";
 
-    private SoramameSQLHelper mDbHelper = null;
-    private SQLiteDatabase mDb = null;
+    // ウィジット関係
+    // ウィジットIDとデータ種別登録
+    public static int setWidgetID(Context context, int nWidgetID, int nType){
+        int rc = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+        try {
+            if (DbHelper == null) {
+                return -1;
+            }
+            // まず、DBをチェックする。
+            Db = DbHelper.getWritableDatabase();
+            if (!Db.isOpen()) {
+                return -2;
+            }
 
-    public void SoramameAccessor(Context context){
-        mDbHelper = new SoramameSQLHelper(context);
+            String[] selectionArgs = {String.valueOf(nWidgetID)};
+            Cursor c = Db.query(SoramameContract.FeedEntry.WIDGET_TABLE, null,
+                    SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID + " = ?", selectionArgs, null, null, null);
+            if (c.getCount() > 0) {
+                // 登録済であれば、更新？
+                if (c.moveToFirst()) {
+                }
+            }
+            else{
+                ContentValues values = new ContentValues();
+                values.put(SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID, nWidgetID);
+                values.put(SoramameContract.FeedEntry.COLUMN_NAME_DATATYPE, nType);
+                // 重複は追加しない
+                long newRowId = Db.insertWithOnConflict(SoramameContract.FeedEntry.WIDGET_TABLE, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+            }
+            c.close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        finally {
+            Db.close();
+        }
+
+        return rc;
     }
+
+    // ウィジットIDとデータ種別問い合わせ
+    public static int getWidgetID(Context context, int nWidgetID){
+        int type = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+        try {
+            if (DbHelper == null) {
+                return -1;
+            }
+            // まず、DBをチェックする。
+            Db = DbHelper.getWritableDatabase();
+            if (!Db.isOpen()) {
+                return -2;
+            }
+
+            String[] selectionArgs = {String.valueOf(nWidgetID)};
+            Cursor c = Db.query(SoramameContract.FeedEntry.WIDGET_TABLE, null,
+                    SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID + " = ?", selectionArgs, null, null, null);
+            if (c.getCount() > 0) {
+                // 登録済であれば、更新？
+                if (c.moveToFirst()) {
+                    type = c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_DATATYPE));
+                }
+            }
+            c.close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        finally {
+            Db.close();
+        }
+
+        return type;
+    }
+
+    // ウィジットIDとデータ種別削除
 
     // 指定都道府県の測定局データを取得
     // まずDBをクエリーし、なければWebから取得しDBに登録する。
     // int nPref 都道府県コード
     // ArrayList<Soramame> 測定局データリスト
-    public int getPref(int nPrefCode, ArrayList<Soramame> list) {
+    public static int getPref(Context context, int nPrefCode, ArrayList<Soramame> list) {
         int rc = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
         try {
-            if (mDbHelper == null) {
+            if (DbHelper == null) {
                 return -1;
             }
             // まず、DBをチェックする。
-            mDb = mDbHelper.getReadableDatabase();
-            if (!mDb.isOpen()) {
+            Db = DbHelper.getReadableDatabase();
+            if (!Db.isOpen()) {
                 return -2;
             }
 
             String[] selectionArgs = {String.valueOf(nPrefCode)};
-            Cursor c = mDb.query(SoramameContract.FeedEntry.TABLE_NAME, null,
+            Cursor c = Db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
                     SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE + " = ?", selectionArgs, null, null, null);
             if (c.getCount() > 0) {
                 // DBにデータがあれば、DBから取得する。
@@ -85,18 +162,18 @@ public class SoramameAccessor {
                     }
                 }
                 c.close();
-                mDb.close();
+                Db.close();
                 return rc;
             }
             c.close();
-            mDb.close();
+            Db.close();
 
             // DBに無ければ、検索してDBに登録する。
             String strOX;
             String strPM25;
             String strWD;
 
-            mDb = mDbHelper.getWritableDatabase();
+            Db = DbHelper.getWritableDatabase();
 
             String url = String.format(Locale.ENGLISH, "%s%s%d", SORABASEURL, SORAPREFURL, nPrefCode);
             Document doc = Jsoup.connect(url).get();
@@ -148,7 +225,7 @@ public class SoramameAccessor {
                                 values.put(SoramameContract.FeedEntry.COLUMN_NAME_WD, ent.getAllow(2) ? 1 : 0);
                                 values.put(SoramameContract.FeedEntry.COLUMN_NAME_SEL, 0);
                                 // 重複は追加しない
-                                long newRowId = mDb.insertWithOnConflict(SoramameContract.FeedEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                                long newRowId = Db.insertWithOnConflict(SoramameContract.FeedEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
                             }
                             //}
                         }
@@ -158,6 +235,13 @@ public class SoramameAccessor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        catch (SQLiteException e){
+            e.printStackTrace();
+        }
+        finally {
+            Db.close();
+        }
+
         return rc;
     }
 }

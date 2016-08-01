@@ -57,7 +57,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
     private static final String SORADATAURL = "DataList.php?MstCode=";
     // 指定都道府県の測定局一覧取得
     private static final String SORAPREFURL ="MstItiranFrame.php?Pref=";
-    private static final String ACTION_START_MY_ALARM = "com.lunarbase24.lookintothesky.ACTION_START_MY_ALARM";
+    private static final String ACTION_START = "com.lunarbase24.lookintothesky.ACTION_START";
 
     int mPref ;                     // 都道府県コード
     private Soramame mSoramame;
@@ -144,8 +144,10 @@ public class SoraAppWidgetConfigureActivity extends Activity {
 //                    Intent serviceIntent = new Intent(context, SoraAppWidget.MyService.class);
 //                    context.startService(serviceIntent);
                     Intent alarmIntent = new Intent(context, SoraAppWidget.class);
-                    alarmIntent.setAction(ACTION_START_MY_ALARM);
+                    // 初回を明示
+                    alarmIntent.setAction(ACTION_START);
                     alarmIntent.putExtra("DataType", nDataType);
+                    alarmIntent.putExtra("WidgetID", mAppWidgetId);
                     PendingIntent operation = PendingIntent.getBroadcast(context, mAppWidgetId, alarmIntent, 0);
                     AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
                     am.set(AlarmManager.RTC, 0, operation);

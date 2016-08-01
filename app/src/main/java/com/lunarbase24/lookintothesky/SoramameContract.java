@@ -13,9 +13,11 @@ public final class SoramameContract {
     /* Inner class that defines the table contents */
     // 測定局名称、コード、住所、緯度経度、OXフラグ、PM2.5フラグ、風速フラグ、選択フラグ
     // 緯度経度をどうするか？
+    // ウィジット毎にデータ種別を保持するために、テーブルを追加
     public static abstract class FeedEntry implements BaseColumns {
         public static final String TABLE_NAME = "soramamestation";
         public static final String DATA_TABLE_NAME = "soramamedata";
+        public static final String WIDGET_TABLE = "soramamewidget";
 
         public static final String COLUMN_NAME_STATION = "stationname";
         public static final String COLUMN_NAME_CODE = "stationcode";
@@ -29,7 +31,8 @@ public final class SoramameContract {
         public static final String COLUMN_NAME_WS = "WS";
         public static final String COLUMN_NAME_SEL = "selected";
         public static final String COLUMN_NAME_IND = "selno";
-
         public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_WIDGETID = "widgetid";
+        public static final String COLUMN_NAME_DATATYPE = "datatype";
     }
 }

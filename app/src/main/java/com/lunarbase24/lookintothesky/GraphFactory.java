@@ -39,7 +39,6 @@ public class GraphFactory {
                 {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
 
         int mMode;                      // 表示データモード 0 PM2.5/1 OX/2 風速
-        int mDispDay;               // 表示日数 0 全て
         int mDispHour = 10;              // 表示時間
 
         mBack = new Paint();
@@ -52,7 +51,6 @@ public class GraphFactory {
         mDot.setStrokeWidth(2);
         mRect = new RectF();
         mMode = nType;
-        mDispDay = 1;
         // OX用のペイント情報
         mOX = new Paint();
         mOX.setColor(Color.argb(75, 255, 0, 0));
@@ -204,11 +202,11 @@ public class GraphFactory {
         // ほぼ文字高さのようなので、マイナスで返るので反転
         TextHeight = -fontMetrics.ascent;
         canvas.drawText(String.format("%s", soramame.getMstName()), paddingLeft*0.5f, paddingTop + TextHeight*0.5f, mTextPaint);
-        // 最新日時
-        canvas.drawText(String.format(Locale.JAPANESE, "%s", soramame.getData().get(0).getDateString()), paddingLeft*1.2f, paddingTop + TextHeight*1.5f, mTextPaint);
+        // データ種別と最新日時
+        canvas.drawText(String.format(Locale.JAPANESE, "%s %s", (mMode == 0 ? "PM2.5" : "  OX"), soramame.getData().get(0).getDateString()), paddingLeft*1.2f, paddingTop + TextHeight*1.5f, mTextPaint);
 
         // 読み書きするファイル名を指定
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + String.format("/soracapture_%d.png", appWidgetId));
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + String.format("/soracapture_%d_%d.png", appWidgetId, mMode));
         // 指定したファイル名が無ければ作成する。
         // SDKバージョンの影響等（パーミッション）以下がエラーとなるので、一旦コメントとする。
 //        if( file.getParentFile().mkdir() ) {

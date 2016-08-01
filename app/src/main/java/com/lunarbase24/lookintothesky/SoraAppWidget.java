@@ -33,7 +33,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Implementation of App Widget functionality.
@@ -47,6 +49,7 @@ import java.util.Locale;
 public class SoraAppWidget extends AppWidgetProvider {
 //    private static Timer timer;
     private static int nCount=0;
+    private static final String ACTION_START = "com.lunarbase24.lookintothesky.ACTION_START";
     private static final String ACTION_START_MY_ALARM = "com.lunarbase24.lookintothesky.ACTION_START_MY_ALARM";
     private static final String ACTION_START_SHARE = "com.lunarbase24.lookintothesky.ACTION_START_SHARE";
     private final long interval = 60 * 60 * 1000;
@@ -83,7 +86,7 @@ public class SoraAppWidget extends AppWidgetProvider {
         for (int i = 0; i < N; i++) {
             SoraAppWidgetConfigureActivity.deleteTitlePref(context, appWidgetIds[i]);
             File image = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
-                    String.format("/soracapture_%d.png", appWidgetIds[i]));
+                    String.format("/soracapture_%d_%d.png", appWidgetIds[i], SoramameAccessor.getWidgetID(context, appWidgetIds[i])));
             if(image.exists()) {
                 image.delete();
             }
@@ -113,8 +116,14 @@ public class SoraAppWidget extends AppWidgetProvider {
 //        }
     }
 
+    // ウィジット更新
+    // Context context
+    // AppWidgetManager appWidgetManager
+    // Soramame soramame    計測データ
+    // int appWidgetId  ウィジットID
+    // int type データ種別 0 PM2.5/1 OX
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, Soramame soramame) {
+                                Soramame soramame, int appWidgetId, int type) {
 
         // ウィジット設定アクティビティ（画面）にて設定した文字列（Prefファイルに保持）をここで取得。
 //        CharSequence widgetText = SoraAppWidgetConfigureActivity.loadTitlePref(context, appWidgetId) + String.format("%d", nCount);
@@ -132,16 +141,29 @@ public class SoraAppWidget extends AppWidgetProvider {
         //Bitmap bmap = BitmapFactory.decodeFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/capture.jpeg", options);
         // とりあえず、optionsは未設定（規定値）の以下にて表示されるようになった。
         Bitmap bmap = BitmapFactory.decodeFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
-                String.format("/soracapture_%d.png", appWidgetId));
+                String.format("/soracapture_%d_%d.png", appWidgetId, type));
         image.setImageViewBitmap(R.id.appwidget_image, bmap);
         // 計測値表示
         // 表示データ種別および値にて色を設定
-        CharSequence widgetText = soramame.getData().get(0).getPM25String();
-        int nColor = soramame.getColor(Soramame.SORAMAME_MODE_PM25, 0);
+        CharSequence widgetText = null;
+        int nColor = 0;
         int nTypeface = Typeface.ITALIC;
         float fSize = 48.0f;
+        boolean flag = true;
+        switch(type){
+            case 0:
+                widgetText = soramame.getData().get(0).getPM25String();
+                nColor = soramame.getColor(Soramame.SORAMAME_MODE_PM25, 0);
+                flag = soramame.getData().get(0).isValidatePM25();
+                break;
+            case 1:
+                widgetText = soramame.getData().get(0).getOXString();
+                nColor = soramame.getColor(Soramame.SORAMAME_MODE_OX, 0);
+                flag = soramame.getData().get(0).isValidateOX();
+                break;
+        }
         // 未計測の場合は文字を小さくする
-        if(!soramame.getData().get(0).isValidatePM25()) {
+        if(!flag) {
             fSize = 28.0f;
             nTypeface = Typeface.NORMAL;
         }
@@ -190,12 +212,17 @@ public class SoraAppWidget extends AppWidgetProvider {
         // 回転の状態（縦、横）に応じてウィジットの配置設定を修正する
         // アラーム受信 更新処理（onUpdateでなくここで処理をする、アラーム処理と内容が同じなので）
         if (intent.getAction().equals(ACTION_START_MY_ALARM) ||
+                intent.getAction().equals(ACTION_START) ||
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
-                Intent serviceIntent = new Intent(context, MyService.class);
-            serviceIntent.putExtra("DataType", intent.getIntExtra("DataType", 0));
-                context.startService(serviceIntent);
+
+            // 初回配置時にIDとデータ種別を保持
+            if (intent.getAction().equals(ACTION_START) ){
+                SoramameAccessor.setWidgetID(context, intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
+            }
+            Intent serviceIntent = new Intent(context, MyService.class);
+            context.startService(serviceIntent);
 //            }
             setAlarm(context);
         }
@@ -240,10 +267,9 @@ public class SoraAppWidget extends AppWidgetProvider {
 //                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
 //                outfile.close();
 
-                int Type = intent.getIntExtra("DataType", 0);
                 final int N = appWidgetIds.length;
                 for (int i = 0; i < N; i++) {
-                    new SoraDesc().execute(appWidgetIds[i], Type);
+                    new SoraDesc().execute(appWidgetIds[i], SoramameAccessor.getWidgetID(this, appWidgetIds[i]));
                 }
             }catch(Exception e){
                 e.printStackTrace();
@@ -265,6 +291,7 @@ public class SoraAppWidget extends AppWidgetProvider {
             Soramame soramame = null;
             SoramameSQLHelper mDbHelper = new SoramameSQLHelper(MyService.this);
             SQLiteDatabase mDb = null;
+
             @Override
             protected void onPreExecute()
             {
@@ -343,7 +370,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                 Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType);
                 // ここでウィジット更新
                 AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
-                updateAppWidget(MyService.this, manager, appWidgetId, soramame);
+                updateAppWidget(MyService.this, manager, soramame, appWidgetId, nType);
             }
         }
 

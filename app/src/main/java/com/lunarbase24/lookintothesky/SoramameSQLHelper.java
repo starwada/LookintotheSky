@@ -51,6 +51,18 @@ public class SoramameSQLHelper  extends SQLiteOpenHelper{
     private static final String SQL_DELETE_DATA_ENTRIES =
             "DROP TABLE IF EXISTS " + SoramameContract.FeedEntry.DATA_TABLE_NAME;
 
+    // ウィジットデータ保持テーブル
+    // ウィジットIDとデータ種別
+    private static final String SQL_CREATE_WIDGET_ENTRIES =
+            "CREATE TABLE " + SoramameContract.FeedEntry.WIDGET_TABLE + " (" +
+                    SoramameContract.FeedEntry._ID + " INTEGER PRIMARY KEY," +
+                    SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID + " INTEGER" + COMMA_SEP +
+                    SoramameContract.FeedEntry.COLUMN_NAME_DATATYPE + " INTEGER" +
+                    " )";
+
+    private static final String SQL_DELETE_WIDGET_ENTRIES =
+            "DROP TABLE IF EXISTS " + SoramameContract.FeedEntry.WIDGET_TABLE;
+
     public SoramameSQLHelper(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -61,6 +73,7 @@ public class SoramameSQLHelper  extends SQLiteOpenHelper{
     {
         db.execSQL(SQL_CREATE_ENTRIES);
         db.execSQL(SQL_CREATE_DATA_ENTRIES);
+        db.execSQL(SQL_CREATE_WIDGET_ENTRIES);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
@@ -69,6 +82,7 @@ public class SoramameSQLHelper  extends SQLiteOpenHelper{
         // to simply to discard the data and start over
         db.execSQL(SQL_DELETE_ENTRIES);
         db.execSQL(SQL_DELETE_DATA_ENTRIES);
+        db.execSQL(SQL_DELETE_WIDGET_ENTRIES);
         onCreate(db);
     }
 
