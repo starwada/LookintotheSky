@@ -159,6 +159,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                 flag = soramame.getData().get(0).isValidatePM25();
                 break;
             case 1:
+                fSize = 40.0f;
                 widgetText = soramame.getData().get(0).getOXString();
                 nColor = soramame.getColor(Soramame.SORAMAME_MODE_OX, 0);
                 flag = soramame.getData().get(0).isValidateOX();

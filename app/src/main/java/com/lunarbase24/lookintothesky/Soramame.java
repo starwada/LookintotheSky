@@ -166,7 +166,7 @@ public class Soramame implements Parcelable{
         }
         public float getOX(){ return m_fOX; }
         public String getOXString(){
-            return (m_fOX < 0.0f ? "未計測" : String.format("%.2f", m_fOX ));
+            return (m_fOX < 0.0f ? "未計測" : String.format("%.3f", m_fOX ));
         }
         public boolean isValidateOX(){ return (m_fOX < 0.0f ? false : true); }
         public  Integer getPM25()
