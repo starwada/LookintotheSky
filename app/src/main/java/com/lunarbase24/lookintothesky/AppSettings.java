@@ -14,6 +14,10 @@ public class AppSettings extends Application{
     int m_nTransp;        // グラフ背景透過率 0～255
     float m_fRadius;        // グラフ丸の半径
 
+    AppSettings(){
+        onCreate();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -21,7 +25,7 @@ public class AppSettings extends Application{
         m_nDispHour = 12;
         m_nUpdateTime = 15;
         m_nTransp = 128;
-        m_fRadius = 8.0f;
+        m_fRadius = 6.0f;
     }
 
     // 各データのスピナー用インデックス
@@ -38,5 +42,26 @@ public class AppSettings extends Application{
         if(nIndex < 0 || nIndex >= 12){ nIndex = 0; }
 
         return nIndex;
+    }
+
+    // 比較
+    public boolean isEqual(AppSettings settings){
+        boolean flag = false;
+        if(m_nDispHour == settings.m_nDispHour &&
+        m_nUpdateTime == settings.m_nUpdateTime &&
+        m_nTransp == settings.m_nTransp &&
+        m_fRadius == settings.m_fRadius ){
+            flag = true;
+        }
+
+        return flag;
+    }
+
+    //
+    public void set(AppSettings settings){
+        m_nDispHour = settings.m_nDispHour;
+        m_nUpdateTime = settings.m_nUpdateTime;
+        m_nTransp = settings.m_nTransp;
+        m_fRadius = settings.m_fRadius;
     }
 }

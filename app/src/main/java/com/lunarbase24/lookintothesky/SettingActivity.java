@@ -1,17 +1,25 @@
 package com.lunarbase24.lookintothesky;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -25,12 +33,15 @@ import java.util.ArrayList;
  */
 public class SettingActivity extends AppCompatActivity {
     private AppSettings m_settings;
+    private AppSettings update;
+    private static final String ACTION_CHANGE_SETTING = "com.lunarbase24.lookintothesky.ACTION_CHANGE_SETTING";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         m_settings = (AppSettings)this.getApplication();
+        update = new AppSettings();
 
         try {
             Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -41,7 +52,6 @@ public class SettingActivity extends AppCompatActivity {
             ActionBar ab = getSupportActionBar();
             // Enable the Up button
             ab.setDisplayHomeAsUpEnabled(true);
-
 
             // 表示時間スピナー
             ArrayList<String> dataList = new ArrayList<String>();
@@ -58,12 +68,11 @@ public class SettingActivity extends AppCompatActivity {
                 DispHour.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        m_settings.m_nDispHour = i+6;
+                        update.m_nDispHour = i+6;
                     }
 
                     @Override
                     public void onNothingSelected(AdapterView<?> adapterView) {
-
                     }
                 });
             }
@@ -83,20 +92,82 @@ public class SettingActivity extends AppCompatActivity {
                 UpdateTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        m_settings.m_nUpdateTime = i*5;
+                        update.m_nUpdateTime = i*5;
                     }
 
                     @Override
                     public void onNothingSelected(AdapterView<?> adapterView) {
-
                     }
                 });
             }
 
             SeekBar trans = (SeekBar)findViewById(R.id.seekBar);
             trans.setMax(255);
-            trans.setProgress(128);
+            trans.setProgress(m_settings.m_nTransp);
+            TextView view = (TextView)findViewById(R.id.textView6);
+            view.setText(String.format("%s:%d", getString(R.string.graph_back), m_settings.m_nTransp));
+            trans.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    update.m_nTransp = i;
+                }
 
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    TextView view = (TextView)findViewById(R.id.textView6);
+                    view.setText(String.format("%s:%d", getString(R.string.graph_back), update.m_nTransp));
+                    Toast toast = Toast.makeText(SettingActivity.this, String.format("%d", update.m_nTransp), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP|Gravity.START, (int)seekBar.getX(), (int)seekBar.getY());
+                    toast.show();
+                }
+            });
+
+            SeekBar radius = (SeekBar)findViewById(R.id.seekBar2);
+            radius.setMax(20);
+            radius.setProgress((int)m_settings.m_fRadius);
+            view = (TextView)findViewById(R.id.textView7);
+            view.setText(String.format("%s:%.1f", getString(R.string.graph_radius), m_settings.m_fRadius));
+            radius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    update.m_fRadius = (float)i;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    TextView view = (TextView)findViewById(R.id.textView7);
+                    view.setText(String.format("%s:%.1f", getString(R.string.graph_radius), update.m_fRadius));
+                    Toast toast = Toast.makeText(SettingActivity.this, String.format("%.1f", update.m_fRadius), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP|Gravity.START, (int)seekBar.getX(), (int)seekBar.getY());
+                    toast.show();
+                }
+            });
+
+            Button setting = (Button)findViewById(R.id.button);
+            setting.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // 同じなら未処理
+                    if(m_settings.isEqual(update)){
+                        return;
+                    }
+                    m_settings.set(update);
+                    // 更新通知
+                    Intent alarmIntent = new Intent(SettingActivity.this, SoraAppWidget.class);
+                    alarmIntent.setAction(ACTION_CHANGE_SETTING);
+                    PendingIntent operation = PendingIntent.getBroadcast(SettingActivity.this, 0, alarmIntent, 0);
+                    AlarmManager am = (AlarmManager)SettingActivity.this.getSystemService(Context.ALARM_SERVICE);
+                    am.set(AlarmManager.RTC, 0, operation);
+                }
+            });
         }catch(NullPointerException e){
             e.printStackTrace();
         }
@@ -104,9 +175,7 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        // 画面の設定を取得
-        // 表示データ種別
-
+        update.set(m_settings);
         super.onPause();
     }
 }

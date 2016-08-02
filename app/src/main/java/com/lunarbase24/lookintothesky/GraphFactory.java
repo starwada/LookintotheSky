@@ -24,7 +24,7 @@ public class GraphFactory {
 
     // 以下を引数とする。
     // グラフ背景の透過率、表示時間、表示データ種別
-    static public Bitmap drawGraph(Soramame soramame, int appWidgetId, int nType){
+    static public Bitmap drawGraph(Soramame soramame, int appWidgetId, int nType, AppSettings settings){
         int rc =0;
         TextPaint mTextPaint;
         Paint mBack;
@@ -39,7 +39,7 @@ public class GraphFactory {
                 {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
 
         int mMode;                      // 表示データモード 0 PM2.5/1 OX/2 風速
-        int mDispHour = 10;              // 表示時間
+        int mDispHour = settings.m_nDispHour;              // 表示時間
 
         mBack = new Paint();
         mBack.setColor(Color.argb(75, 0, 0, 255));
@@ -77,7 +77,7 @@ public class GraphFactory {
         float y = (float)(paddingTop+contentHeight);
         float rh = (float)contentHeight/mDotY[mMode][5];
 
-        int nTransparent = 128;
+        int nTransparent = settings.m_nTransp;
         mTextPaint = new TextPaint();
         mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextAlign(Paint.Align.LEFT);
@@ -151,12 +151,11 @@ public class GraphFactory {
 
             int nCount=0;
             float doty = 0f;
-            float fradius = 8.0f;
+            float fradius = settings.m_fRadius;
             float fOXY[] = { 0.0f, 0.0f  };
             for( Soramame.SoramameData data : list){
                 if( nCount > mDispHour){ break; }
                 //if( mDispDay != 0 && nCount > mDispDay*24 ){ break; }
-                fradius = 6.0f;
                 switch(mMode){
                     case 0:
                         doty = y-(data.getPM25() * (float)contentHeight/mDotY[mMode][5]);
@@ -203,7 +202,7 @@ public class GraphFactory {
         TextHeight = -fontMetrics.ascent;
         canvas.drawText(String.format("%s", soramame.getMstName()), paddingLeft*0.5f, paddingTop + TextHeight*0.5f, mTextPaint);
         // データ種別と最新日時
-        canvas.drawText(String.format(Locale.JAPANESE, "%s %s", (mMode == 0 ? "PM2.5" : "  OX"), soramame.getData().get(0).getDateString()), paddingLeft*1.2f, paddingTop + TextHeight*1.5f, mTextPaint);
+        canvas.drawText(String.format(Locale.JAPANESE, "%s %s", (mMode == 0 ? "PM2.5" : "   OX"), soramame.getData().get(0).getDateString()), paddingLeft*1.2f, paddingTop + TextHeight*1.5f, mTextPaint);
 
         // 読み書きするファイル名を指定
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + String.format("/soracapture_%d_%d.png", appWidgetId, mMode));

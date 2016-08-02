@@ -114,6 +114,68 @@ public class SoramameAccessor {
     }
 
     // ウィジットIDとデータ種別削除
+    public static int deleteWidgetID(Context context, int nWidgetID){
+        int rc = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+        try {
+            if (DbHelper == null) {
+                return -1;
+            }
+            // まず、DBをチェックする。
+            Db = DbHelper.getWritableDatabase();
+            if (!Db.isOpen()) {
+                return -2;
+            }
+
+            String[] selectionArgs = {String.valueOf(nWidgetID)};
+            rc = Db.delete(SoramameContract.FeedEntry.WIDGET_TABLE,
+                    SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID + " = ?", selectionArgs);
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+        finally {
+            Db.close();
+        }
+
+        return rc;
+    }
+
+    // 測定局関係
+    // 指定測定局コードのデータ取得
+    public static int getStation(Context context, int nCode, String station[]){
+        int rc = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+
+        try {
+            if (DbHelper == null) {
+                return -1;
+            }
+            // まず、DBをチェックする。
+            Db = DbHelper.getReadableDatabase();
+            if (!Db.isOpen()) {
+                return -2;
+            }
+
+            String strWhereArg[] = {String.valueOf(nCode)};
+            // 日付でソート desc 降順（新しい->古い）
+            Cursor c = Db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
+                    SoramameContract.FeedEntry.COLUMN_NAME_CODE + " = ?", strWhereArg, null, null, null);
+            rc = c.getCount();
+            if (rc > 0){
+                if (c.moveToFirst()) {
+                    station[0] = c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_STATION));
+                    station[1] = c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS));
+                }
+            }
+            c.close();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+        return rc;
+    }
 
     // 指定都道府県の測定局データを取得
     // まずDBをクエリーし、なければWebから取得しDBに登録する。

@@ -52,8 +52,9 @@ public class SoraAppWidget extends AppWidgetProvider {
     private static final String ACTION_START = "com.lunarbase24.lookintothesky.ACTION_START";
     private static final String ACTION_START_MY_ALARM = "com.lunarbase24.lookintothesky.ACTION_START_MY_ALARM";
     private static final String ACTION_START_SHARE = "com.lunarbase24.lookintothesky.ACTION_START_SHARE";
+    private static final String ACTION_CHANGE_SETTING = "com.lunarbase24.lookintothesky.ACTION_CHANGE_SETTING";
     private final long interval = 60 * 60 * 1000;
-    private final long alarmtime = 30 * 60 * 1000;  // アラーム設定分
+    private long alarmtime = 30 * 60 * 1000;  // アラーム設定分
 
     private static  final  String SORABASEURL="http://soramame.taiki.go.jp/";
     private static final String SORADATAURL = "DataList.php?MstCode=";
@@ -90,6 +91,7 @@ public class SoraAppWidget extends AppWidgetProvider {
             if(image.exists()) {
                 image.delete();
             }
+            SoramameAccessor.deleteWidgetID(context, appWidgetIds[i]);
         }
     }
 
@@ -213,10 +215,13 @@ public class SoraAppWidget extends AppWidgetProvider {
         // アラーム受信 更新処理（onUpdateでなくここで処理をする、アラーム処理と内容が同じなので）
         if (intent.getAction().equals(ACTION_START_MY_ALARM) ||
                 intent.getAction().equals(ACTION_START) ||
+                intent.getAction().equals(ACTION_CHANGE_SETTING) ||
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
 
+            AppSettings settings = (AppSettings)context.getApplicationContext();
+            alarmtime = settings.m_nUpdateTime * 60 * 1000;
             // 初回配置時にIDとデータ種別を保持
             if (intent.getAction().equals(ACTION_START) ){
                 SoramameAccessor.setWidgetID(context, intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
@@ -252,10 +257,12 @@ public class SoraAppWidget extends AppWidgetProvider {
     }
 
     public static class MyService extends Service {
+        AppSettings mSettings;
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
 
             try {
+                mSettings = (AppSettings) this.getApplication();
                 ComponentName thisWidget = new ComponentName(this, SoraAppWidget.class);
                 AppWidgetManager manager = AppWidgetManager.getInstance(this);
                 int appWidgetIds[] = manager.getAppWidgetIds(thisWidget);
@@ -289,8 +296,6 @@ public class SoraAppWidget extends AppWidgetProvider {
             int appWidgetId = 0;
             int nType = 0;
             Soramame soramame = null;
-            SoramameSQLHelper mDbHelper = new SoramameSQLHelper(MyService.this);
-            SQLiteDatabase mDb = null;
 
             @Override
             protected void onPreExecute()
@@ -310,13 +315,9 @@ public class SoraAppWidget extends AppWidgetProvider {
                     int nCode = SoraAppWidgetConfigureActivity.loadPref(MyService.this, appWidgetId);
                     if(nCode == 0){ return -1; }
 
-                    mDb = mDbHelper.getReadableDatabase();
-                    if (!mDb.isOpen()) {
-                        return -2;
-                    }
                     // checkDB()の戻り値はデータ数
                     String[] station = new String[2] ;
-                    if( checkDB(nCode, mDb, station) < 1 ){ return -3; }
+                    if( SoramameAccessor.getStation(MyService.this, nCode, station) < 1 ){ return -3; }
                     soramame = new Soramame(nCode, station[0], station[1]);
 
                     // ここは、DBから取得も想定する
@@ -359,7 +360,6 @@ public class SoraAppWidget extends AppWidgetProvider {
             @Override
             protected void onPostExecute(Integer result)
             {
-                if(mDb != null && mDb.isOpen()){ mDb.close(); }
                 if(result < 0){ return ; }
 
                 // こうすると、更新する度に新しい設定で作成される。
@@ -367,41 +367,11 @@ public class SoraAppWidget extends AppWidgetProvider {
                 // ウィジット毎に設定を・・・
                 // つまり、データ種別はウィジット作成時に決定する。
                 AppSettings settings = (AppSettings)MyService.this.getApplication();
-                Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType);
+                Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType, mSettings);
                 // ここでウィジット更新
                 AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
                 updateAppWidget(MyService.this, manager, soramame, appWidgetId, nType);
             }
-        }
-
-        // soramame 測定局データ
-        // nCode 測定局コード
-        // db DB
-        // station 測定局名/測定局所在地
-        // 返り値：0    正常終了/1　DBに指定測定局データが無い（サイトからデータを取得する）
-        private int checkDB(int nCode, SQLiteDatabase db, String station[]) {
-            int rc = 0;
-
-            try {
-                if (!db.isOpen()) {
-                    return -1;
-                }
-                String strWhereArg[] = {String.valueOf(nCode)};
-                // 日付でソート desc 降順（新しい->古い）
-                Cursor c = db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
-                        SoramameContract.FeedEntry.COLUMN_NAME_CODE + " = ?", strWhereArg, null, null, null);
-                rc = c.getCount();
-                if (rc > 0){
-                    if (c.moveToFirst()) {
-                        station[0] = c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_STATION));
-                        station[1] = c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS));
-                    }
-                }
-                c.close();
-            } catch (SQLiteException e) {
-                e.printStackTrace();
-            }
-            return rc;
         }
     }
 
