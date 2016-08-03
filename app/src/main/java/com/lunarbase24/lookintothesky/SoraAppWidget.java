@@ -32,6 +32,7 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -55,10 +56,6 @@ public class SoraAppWidget extends AppWidgetProvider {
     private static final String ACTION_CHANGE_SETTING = "com.lunarbase24.lookintothesky.ACTION_CHANGE_SETTING";
     private final long interval = 60 * 60 * 1000;
     private long alarmtime = 30 * 60 * 1000;  // アラーム設定分
-
-    private static  final  String SORABASEURL="http://soramame.taiki.go.jp/";
-    private static final String SORADATAURL = "DataList.php?MstCode=";
-    private static final String SORADATEFILE = "SoraDateFile";
 
     // 表示区分 PM2.5 OX（光化学オキシダント） WS（風速）
     // GraphFactoryにも同様に定義している
@@ -220,8 +217,12 @@ public class SoraAppWidget extends AppWidgetProvider {
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
+            Toast toast = Toast.makeText(context, String.format("%s", intent.getAction()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
+            toast.show();
 
             AppSettings settings = (AppSettings)context.getApplicationContext();
+            if(settings == null){ return; }
             alarmtime = settings.m_nUpdateTime * 60 * 1000;
             // 初回配置時にIDとデータ種別を保持
             if (intent.getAction().equals(ACTION_START) ){
@@ -307,6 +308,7 @@ public class SoraAppWidget extends AppWidgetProvider {
             @Override
             protected Integer doInBackground(Integer... appWidgetIds)
             {
+                int rc = 0;
                 try
                 {
                     String strMstURL = "";
@@ -316,52 +318,34 @@ public class SoraAppWidget extends AppWidgetProvider {
                     int nCode = SoraAppWidgetConfigureActivity.loadPref(MyService.this, appWidgetId);
                     if(nCode == 0){ return -1; }
 
-                    // checkDB()の戻り値はデータ数
+                    // getStation()の戻り値はデータ数
                     String[] station = new String[2] ;
-                    if( SoramameAccessor.getStation(MyService.this, nCode, station) < 1 ){ return -3; }
+                    if( SoramameAccessor.getStation(MyService.this, nCode, station) < 1 ){ return -2; }
                     soramame = new Soramame(nCode, station[0], station[1]);
 
-                    // ここは、DBから取得も想定する
-                    String url = String.format(Locale.ENGLISH, "%s%s%d", SORABASEURL, SORADATAURL, nCode);
-                    Document doc = Jsoup.connect(url).get();
-                    Elements elements = doc.getElementsByAttributeValue("name", "Hyou");
-//                Integer size = elements.size();
-                    for( Element element : elements)
-                    {
-                        if( element.hasAttr("src"))
-                        {
-                            url = element.attr("src");
-                            strMstURL = SORABASEURL + url;
-                            // ここでは、測定局のURL解決まで、URLを次のアクティビティに渡す。
-                            break;
-                        }
-                    }
+                    ArrayList<Soramame> list = new ArrayList<Soramame>();
+                    list.add(soramame);
 
-                    Document sora = Jsoup.connect(strMstURL).get();
-                    Element body = sora.body();
-                    Elements tables = body.getElementsByAttributeValue("align", "right");
-
-                    for( Element ta : tables)
-                    {
-                        Elements data = ta.getElementsByTag("td");
-                        // 0 西暦/1 月/2 日/3 時間
-                        // 4 SO2/5 NO/6 NO2/7 NOX/8 CO/9 OX/10 NMHC/11 CH4/12 THC/13 SPM/14 PM2.5/15 SP/16 WD/17 WS
-                        soramame.setData(data.get(0).text(), data.get(1).text(), data.get(2).text(), data.get(3).text(),
-                                data.get(9).text(), data.get(14).text(), data.get(16).text(), data.get(17).text());
-                        count++;
-                    }
+                    rc = SoramameAccessor.getSoramameData(MyService.this, list);
                 }
-                catch(IOException e)
+                catch(Exception e)
                 {
+                    rc = -3;
                     e.printStackTrace();
                 }
-                return 0;
+                return rc;
             }
 
             @Override
             protected void onPostExecute(Integer result)
             {
                 if(result < 0){ return ; }
+                if(soramame.getData() == null){
+                    Toast toast = Toast.makeText(MyService.this, String.format("%s データなし", soramame.getMstName()), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
+                    toast.show();
+                    return;
+                }
 
                 // こうすると、更新する度に新しい設定で作成される。
                 // 表示時間と更新時間はいいけど、データ種別が変わってしまう。
