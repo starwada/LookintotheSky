@@ -283,11 +283,15 @@ public class SoramameAccessor {
     }
 
     // 計測データテーブル関係
-    public static int getSoramameData(Context context, ArrayList<Soramame> mList){
+    // Context
+    // ArrayList<Soramame>
+    // int 更新時間（分）
+    public static int getSoramameData(Context context, ArrayList<Soramame> mList, int nGap){
         int rc = 0;
         SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
         SQLiteDatabase Db = null;
         String strMstURL = "";
+        nGap += 120;
         try {
             // まず、DBをチェックする。
             Db = DbHelper.getWritableDatabase();
@@ -297,10 +301,12 @@ public class SoramameAccessor {
             GregorianCalendar now = new GregorianCalendar(Locale.JAPAN);
 
             for (Soramame soramame : mList) {
+                rc = 0;
                 // 計測時間との差をみる、データが存在しない場合もfalseとなる。
                 // 内部データ（mList）が有効な場合は不要なDBアクセスもしない。
-                // 次の更新まで9０分程度と想定、比較先は１時間前のデータなので、トータルで１５０分と設定する。
-                if (soramame.isLoaded(now, 150)) {
+                // 次の更新まで120分+更新時間と想定、比較先は１時間前のデータなので。
+                if (soramame.isLoaded(now, nGap)) {
+                    rc = 1;
                     continue;
                 }
                 // ここで、指定測定局のデータがDBにあるかチェックする
@@ -308,7 +314,8 @@ public class SoramameAccessor {
                 rc = checkDB(soramame, Db);
                 if (rc != 1) {
                     // DBからデータは取得したが、現在時間とのチェックを行う。
-                    if (soramame.isLoaded(now, 150)) {
+                    if (soramame.isLoaded(now, nGap)) {
+                        rc = 2;
                         continue;
                     }
                 }

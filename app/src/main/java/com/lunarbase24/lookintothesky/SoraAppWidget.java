@@ -326,7 +326,8 @@ public class SoraAppWidget extends AppWidgetProvider {
                     ArrayList<Soramame> list = new ArrayList<Soramame>();
                     list.add(soramame);
 
-                    rc = SoramameAccessor.getSoramameData(MyService.this, list);
+                    int nGap = mSettings.m_nUpdateTime;
+                    rc = SoramameAccessor.getSoramameData(MyService.this, list, nGap);
                 }
                 catch(Exception e)
                 {
@@ -351,8 +352,11 @@ public class SoraAppWidget extends AppWidgetProvider {
                 // 表示時間と更新時間はいいけど、データ種別が変わってしまう。
                 // ウィジット毎に設定を・・・
                 // つまり、データ種別はウィジット作成時に決定する。
-                AppSettings settings = (AppSettings)MyService.this.getApplication();
-                Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType, mSettings);
+                // データの更新が無ければ画像は作成しない。
+                if( result == 0 ) {
+                    AppSettings settings = (AppSettings) MyService.this.getApplication();
+                    Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType, mSettings);
+                }
                 // ここでウィジット更新
                 AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
                 updateAppWidget(MyService.this, manager, soramame, appWidgetId, nType);

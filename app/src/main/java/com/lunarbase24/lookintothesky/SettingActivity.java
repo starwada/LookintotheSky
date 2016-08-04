@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,6 +53,10 @@ public class SettingActivity extends AppCompatActivity {
             ActionBar ab = getSupportActionBar();
             // Enable the Up button
             ab.setDisplayHomeAsUpEnabled(true);
+
+            SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+            m_settings.m_nDispHour = sharedPref.getInt("CurrentType", update.m_nDispHour);
+            m_settings.m_nUpdateTime = sharedPref.getInt("CurrentDay", update.m_nUpdateTime);
 
             // 表示時間スピナー
             ArrayList<String> dataList = new ArrayList<String>();
