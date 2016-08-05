@@ -52,10 +52,12 @@ public class SoramameSQLHelper  extends SQLiteOpenHelper{
             "DROP TABLE IF EXISTS " + SoramameContract.FeedEntry.DATA_TABLE_NAME;
 
     // ウィジットデータ保持テーブル
-    // ウィジットIDとデータ種別
+    // 測定局コード、ウィジットID（ユニークデータ）とデータ種別
+    // あとの処理を想定して、測定局コードも保持する。
     private static final String SQL_CREATE_WIDGET_ENTRIES =
             "CREATE TABLE " + SoramameContract.FeedEntry.WIDGET_TABLE + " (" +
                     SoramameContract.FeedEntry._ID + " INTEGER PRIMARY KEY," +
+                    SoramameContract.FeedEntry.COLUMN_NAME_CODE + " INTEGER" + COMMA_SEP +
                     SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID + " INTEGER" + COMMA_SEP +
                     SoramameContract.FeedEntry.COLUMN_NAME_DATATYPE + " INTEGER" +
                     " )";

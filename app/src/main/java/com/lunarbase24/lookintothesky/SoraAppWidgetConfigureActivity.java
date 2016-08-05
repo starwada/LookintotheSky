@@ -139,13 +139,13 @@ public class SoraAppWidgetConfigureActivity extends Activity {
                 if(mList!=null && !(position < 0)) {
                     final Context context = SoraAppWidgetConfigureActivity.this;
                     mSoramame = mList.get(position);
-                    savePref(context, mAppWidgetId, mSoramame.getMstCode());
 
 //                    Intent serviceIntent = new Intent(context, SoraAppWidget.MyService.class);
 //                    context.startService(serviceIntent);
                     Intent alarmIntent = new Intent(context, SoraAppWidget.class);
                     // 初回を明示
                     alarmIntent.setAction(ACTION_START);
+                    alarmIntent.putExtra("MstCode", mSoramame.getMstCode());
                     alarmIntent.putExtra("DataType", nDataType);
                     alarmIntent.putExtra("WidgetID", mAppWidgetId);
                     PendingIntent operation = PendingIntent.getBroadcast(context, mAppWidgetId, alarmIntent, 0);

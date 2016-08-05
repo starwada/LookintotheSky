@@ -126,9 +126,6 @@ public class SoraAppWidget extends AppWidgetProvider {
 
         // ウィジット設定アクティビティ（画面）にて設定した文字列（Prefファイルに保持）をここで取得。
 //        CharSequence widgetText = SoraAppWidgetConfigureActivity.loadTitlePref(context, appWidgetId) + String.format("%d", nCount);
-        // Soramameを渡すようにしたので、以下はいらないな。
-        int nCode = SoraAppWidgetConfigureActivity.loadPref(context, appWidgetId);
-        if( nCode == 0 ){ return ; }
         // Construct the RemoteViews object
 //        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.sora_app_widget);
 //        views.setTextViewText(R.id.appwidget_text, widgetText);
@@ -226,7 +223,8 @@ public class SoraAppWidget extends AppWidgetProvider {
             alarmtime = settings.m_nUpdateTime * 60 * 1000;
             // 初回配置時にIDとデータ種別を保持
             if (intent.getAction().equals(ACTION_START) ){
-                SoramameAccessor.setWidgetID(context, intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
+                // 初回時にDBに保存しておく
+                SoramameAccessor.setWidgetID(context, intent.getIntExtra("MstCode", 0), intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
             }
             Intent serviceIntent = new Intent(context, MyService.class);
             context.startService(serviceIntent);
@@ -265,9 +263,6 @@ public class SoraAppWidget extends AppWidgetProvider {
 
             try {
                 mSettings = (AppSettings) this.getApplication();
-                ComponentName thisWidget = new ComponentName(this, SoraAppWidget.class);
-                AppWidgetManager manager = AppWidgetManager.getInstance(this);
-                int appWidgetIds[] = manager.getAppWidgetIds(thisWidget);
 
                 // デバッグ用コード 呼ばれるタイミングを出力
 //                Date now = new Date();
@@ -276,9 +271,14 @@ public class SoraAppWidget extends AppWidgetProvider {
 //                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
 //                outfile.close();
 
-                final int N = appWidgetIds.length;
-                for (int i = 0; i < N; i++) {
-                    new SoraDesc().execute(appWidgetIds[i], SoramameAccessor.getWidgetID(this, appWidgetIds[i]));
+                // 同じ測定局のデータは１度で済ませたい。
+                // ここで、DBのウィジットテーブルに問い合わせして、ウィジット情報を取得。
+                // ここでAsyncTaskを使う理由はWebアクセスのため。
+                // ウィジットで使っている測定局を取得、その分ループして、測定局の計測データを取得する。
+                int[] nMstCodes = SoramameAccessor.getWidgetMst(this);
+                if(nMstCodes == null){ return 0; }
+                for (int nCode: nMstCodes) {
+                    new SoraDesc().execute(nCode);
                 }
             }catch(Exception e){
                 e.printStackTrace();
@@ -292,11 +292,10 @@ public class SoraAppWidget extends AppWidgetProvider {
             return null;
         }
 
+        // 測定局毎のウィジット更新
+        // <params, progress, result>
         private class SoraDesc extends AsyncTask<Integer, Void, Integer>
         {
-            int count = 0;
-            int appWidgetId = 0;
-            int nType = 0;
             Soramame soramame = null;
 
             @Override
@@ -305,23 +304,18 @@ public class SoraAppWidget extends AppWidgetProvider {
                 super.onPreExecute();
             }
 
+            // 指定測定局の計測データを取得する
+            // nMstCode 測定局コード
             @Override
-            protected Integer doInBackground(Integer... appWidgetIds)
+            protected Integer doInBackground(Integer... nMstCodes)
             {
                 int rc = 0;
                 try
                 {
-                    String strMstURL = "";
-                    appWidgetId = appWidgetIds[0];
-                    nType = appWidgetIds[1];
-                    // 測定局コード取得
-                    int nCode = SoraAppWidgetConfigureActivity.loadPref(MyService.this, appWidgetId);
-                    if(nCode == 0){ return -1; }
-
                     // getStation()の戻り値はデータ数
                     String[] station = new String[2] ;
-                    if( SoramameAccessor.getStation(MyService.this, nCode, station) < 1 ){ return -2; }
-                    soramame = new Soramame(nCode, station[0], station[1]);
+                    if( SoramameAccessor.getStation(MyService.this, nMstCodes[0], station) < 1 ){ return -2; }
+                    soramame = new Soramame(nMstCodes[0], station[0], station[1]);
 
                     ArrayList<Soramame> list = new ArrayList<Soramame>();
                     list.add(soramame);
@@ -348,18 +342,16 @@ public class SoraAppWidget extends AppWidgetProvider {
                     return;
                 }
 
-                // こうすると、更新する度に新しい設定で作成される。
-                // 表示時間と更新時間はいいけど、データ種別が変わってしまう。
-                // ウィジット毎に設定を・・・
-                // つまり、データ種別はウィジット作成時に決定する。
-                // データの更新が無ければ画像は作成しない。
-                if( result == 0 ) {
+                // 同じ測定局は一度に処理をする
+                int[] appWidgetIds = SoramameAccessor.getWidgetIDByMst(MyService.this, soramame.getMstCode());
+                for( int i=0; i<appWidgetIds.length; i++ ) {
                     AppSettings settings = (AppSettings) MyService.this.getApplication();
-                    Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetId, nType, mSettings);
+                    Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetIds[i], appWidgetIds[i+1], mSettings);
+                    // ここでウィジット更新
+                    AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
+                    updateAppWidget(MyService.this, manager, soramame, appWidgetIds[i], appWidgetIds[i+1]);
+                    i++;
                 }
-                // ここでウィジット更新
-                AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
-                updateAppWidget(MyService.this, manager, soramame, appWidgetId, nType);
             }
         }
     }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.support.annotation.Nullable;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,9 +36,15 @@ public class SoramameAccessor {
     // 指定都道府県の測定局一覧取得
     private static final String SORAPREFURL ="MstItiranFrame.php?Pref=";
 
+    // DBアクセスとWebアクセスが混同している。<-よくない。
+    // Webアクセスだけはスレッド分けたい。DBアクセスのみの関数もあるが。
+
     // ウィジット関係
     // ウィジットIDとデータ種別登録
-    public static int setWidgetID(Context context, int nWidgetID, int nType){
+    // int nMstCode 測定局コード
+    // int nWidgetID    ウィジットID
+    // int nType    データ種別
+    public static int setWidgetID(Context context, int nMstCode,  int nWidgetID, int nType){
         int rc = 0;
         SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
         SQLiteDatabase Db = null;
@@ -53,6 +60,7 @@ public class SoramameAccessor {
                     SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID + " = ?", selectionArgs, null, null, null);
             if (c.getCount() == 0) {
                 ContentValues values = new ContentValues();
+                values.put(SoramameContract.FeedEntry.COLUMN_NAME_CODE, nMstCode);
                 values.put(SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID, nWidgetID);
                 values.put(SoramameContract.FeedEntry.COLUMN_NAME_DATATYPE, nType);
                 // 重複は追加しない
@@ -97,6 +105,86 @@ public class SoramameAccessor {
         }
 
         return type;
+    }
+
+    // ウィジットの測定局データを取得
+    @Nullable
+    public static int[] getWidgetMst(Context context){
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+        int[] nMstCodes = null;
+        try {
+            // まず、DBをチェックする。
+            Db = DbHelper.getReadableDatabase();
+            if (!Db.isOpen()) {
+                return null;
+            }
+
+            // 重複なしで抽出
+            Cursor c = Db.query(true, SoramameContract.FeedEntry.WIDGET_TABLE, null, null, null, null, null, null, null);
+            int count = c.getCount();
+            if (count > 0) {
+                nMstCodes = new int[count];
+                // 登録済であれば、更新？
+                if (c.moveToFirst()) {
+                    int i=0;
+                    while(true){
+                        nMstCodes[i++] = c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_CODE));
+                        if(!c.moveToNext()){
+                            break;
+                        }
+                    }
+                }
+            }
+            c.close();
+            Db.close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+
+        return nMstCodes ;
+    }
+
+    // 指定測定局のウィジットIDとデータタイプのペアを返す
+    @Nullable
+    public static int[] getWidgetIDByMst(Context context, int nMstCode){
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+        int[] nWidgetIDs = null;
+        try {
+            // まず、DBをチェックする。
+            Db = DbHelper.getReadableDatabase();
+            if (!Db.isOpen()) {
+                return null;
+            }
+
+            String[] selectionArgs = {String.valueOf(nMstCode)};
+            Cursor c = Db.query(SoramameContract.FeedEntry.WIDGET_TABLE, null,
+                    SoramameContract.FeedEntry.COLUMN_NAME_CODE + " = ?", selectionArgs, null, null, null);
+            int count = c.getCount();
+            if (count > 0) {
+                nWidgetIDs = new int[count*2];
+                // 登録済であれば、更新？
+                if (c.moveToFirst()) {
+                    int i=0;
+                    while(true){
+                        nWidgetIDs[i++] = c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_WIDGETID));
+                        nWidgetIDs[i++] = c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_DATATYPE));
+                        if(!c.moveToNext()){
+                            break;
+                        }
+                    }
+                }
+            }
+            c.close();
+            Db.close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+
+        return nWidgetIDs ;
     }
 
     // ウィジットIDとデータ種別削除
@@ -345,13 +433,13 @@ public class SoramameAccessor {
                 // Collections.copy()
                 // 注意！そらまめのデータに、ごっそり存在しないような場合もあった。
                 // ある時間のデータが無い。
+                rc = 0;
                 Soramame aData = new Soramame();
                 int count = 0;
                 for (Element ta : tables) {
                     Elements data = ta.getElementsByTag("td");
                     // 0 西暦/1 月/2 日/3 時間
                     // 4 SO2/5 NO/6 NO2/7 NOX/8 CO/9 OX/10 NMHC/11 CH4/12 THC/13 SPM/14 PM2.5/15 SP/16 WD/17 WS
-
                     if (soramame.isLoaded(data.get(0).text(), data.get(1).text(), data.get(2).text(), data.get(3).text(), 60)) {
                         break;
                     }
