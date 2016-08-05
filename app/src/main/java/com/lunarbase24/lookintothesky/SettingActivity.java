@@ -55,8 +55,8 @@ public class SettingActivity extends AppCompatActivity {
             ab.setDisplayHomeAsUpEnabled(true);
 
             SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-            m_settings.m_nDispHour = sharedPref.getInt("CurrentType", update.m_nDispHour);
-            m_settings.m_nUpdateTime = sharedPref.getInt("CurrentDay", update.m_nUpdateTime);
+            m_settings.m_nDispHour = sharedPref.getInt("DispHour", update.m_nDispHour);
+            m_settings.m_nUpdateTime = sharedPref.getInt("UpdateTime", update.m_nUpdateTime);
 
             // 表示時間スピナー
             ArrayList<String> dataList = new ArrayList<String>();
@@ -181,6 +181,11 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         update.set(m_settings);
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("DispHour", update.m_nDispHour);
+        editor.putInt("UpdateTime", update.m_nUpdateTime);
+        editor.apply();
         super.onPause();
     }
 }
