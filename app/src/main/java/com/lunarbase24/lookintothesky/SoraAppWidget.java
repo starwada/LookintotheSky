@@ -19,6 +19,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.RemoteViews;
@@ -203,6 +204,7 @@ public class SoraAppWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        Log.d("onReceive", String.format("%s", intent.getAction()));
         // ホーム画面が回転されたのをキャッチする
         // 以下で回転の状態を取得する。
         //context.getResources().getConfiguration().orientation
@@ -270,6 +272,7 @@ public class SoraAppWidget extends AppWidgetProvider {
 //                FileOutputStream outfile = openFileOutput(SORADATEFILE, Context.MODE_APPEND);
 //                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
 //                outfile.close();
+//                Log.d("onStartCommand", String.format("%d", mSettings.m_nDispHour));
 
                 // 同じ測定局のデータは１度で済ませたい。
                 // ここで、DBのウィジットテーブルに問い合わせして、ウィジット情報を取得。
@@ -284,7 +287,9 @@ public class SoraAppWidget extends AppWidgetProvider {
                 e.printStackTrace();
             }
 
-            return 0;
+            // MainActivity等のActivityを終了させると、onStartCommand()が呼ばれる。
+            // それを防ぐには以下のようにSTART_NOT_STICKYを返す。
+            return START_NOT_STICKY;
         }
 
         @Override
@@ -336,21 +341,22 @@ public class SoraAppWidget extends AppWidgetProvider {
             {
                 if(result < 0){ return ; }
                 if(soramame.getData() == null){
-                    Toast toast = Toast.makeText(MyService.this, String.format("%s データなし", soramame.getMstName()), Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
-                    toast.show();
                     return;
                 }
 
-                // 同じ測定局は一度に処理をする
-                int[] appWidgetIds = SoramameAccessor.getWidgetIDByMst(MyService.this, soramame.getMstCode());
-                for( int i=0; i<appWidgetIds.length; i++ ) {
-                    AppSettings settings = (AppSettings) MyService.this.getApplication();
-                    Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetIds[i], appWidgetIds[i+1], mSettings);
-                    // ここでウィジット更新
-                    AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
-                    updateAppWidget(MyService.this, manager, soramame, appWidgetIds[i], appWidgetIds[i+1]);
-                    i++;
+                try {
+                    // 同じ測定局は一度に処理をする
+                    int[] appWidgetIds = SoramameAccessor.getWidgetIDByMst(MyService.this, soramame.getMstCode());
+                    for (int i = 0; i < appWidgetIds.length; i++) {
+                        AppSettings settings = (AppSettings) MyService.this.getApplication();
+                        Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetIds[i], appWidgetIds[i + 1], mSettings);
+                        // ここでウィジット更新
+                        AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
+                        updateAppWidget(MyService.this, manager, soramame, appWidgetIds[i], appWidgetIds[i + 1]);
+                        i++;
+                    }
+                }catch(NullPointerException e){
+                    e.printStackTrace();
                 }
             }
         }
