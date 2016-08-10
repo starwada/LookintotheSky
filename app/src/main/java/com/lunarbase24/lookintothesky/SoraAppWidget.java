@@ -64,6 +64,11 @@ public class SoraAppWidget extends AppWidgetProvider {
             {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
             {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
 
+    public static AppSettings mSettings;
+
+    public static AppSettings getSetting(){
+        return mSettings;
+    }
     // 以下はシステムのタイミングで呼ばれる
     // 最初、ウィジットを画面に配置する際に設定アクティビティよりも先に呼ばれる。
     // 後は、システムのタイミング
@@ -220,9 +225,11 @@ public class SoraAppWidget extends AppWidgetProvider {
             toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
             toast.show();
 
-            AppSettings settings = (AppSettings)context.getApplicationContext();
-            if(settings == null){ return; }
-            alarmtime = settings.m_nUpdateTime * 60 * 1000;
+            if( intent.getAction().equals(ACTION_CHANGE_SETTING)) {
+                mSettings = (AppSettings) context.getApplicationContext();
+            }
+            if(mSettings == null){ return; }
+            alarmtime = mSettings.m_nUpdateTime * 60 * 1000;
             // 初回配置時にIDとデータ種別を保持
             if (intent.getAction().equals(ACTION_START) ){
                 // 初回時にDBに保存しておく
@@ -259,12 +266,13 @@ public class SoraAppWidget extends AppWidgetProvider {
     }
 
     public static class MyService extends Service {
-        AppSettings mSettings;
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
 
             try {
-                mSettings = (AppSettings) this.getApplication();
+                // Activityが無い状態（この表現が正しいかは不明）でこれが呼ばれると、
+                // 空を受け取るのでアウト。
+                // AppWidgetではだめなのか。
 
                 // デバッグ用コード 呼ばれるタイミングを出力
 //                Date now = new Date();
@@ -325,7 +333,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                     ArrayList<Soramame> list = new ArrayList<Soramame>();
                     list.add(soramame);
 
-                    int nGap = mSettings.m_nUpdateTime;
+                    int nGap = SoraAppWidget.getSetting().m_nUpdateTime;
                     rc = SoramameAccessor.getSoramameData(MyService.this, list, nGap);
                 }
                 catch(Exception e)

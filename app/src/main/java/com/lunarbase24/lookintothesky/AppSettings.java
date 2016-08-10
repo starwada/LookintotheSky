@@ -1,6 +1,8 @@
 package com.lunarbase24.lookintothesky;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 /**
  * Created by Wada on 2016/07/29.
