@@ -7,13 +7,17 @@
         <ListPreference
             android:key="disphour_preference"
             android:title="@string/disphour"
+            android:summary="@string/disphour"
+            android:dialogTitle="@string/disphour"
             android:entries="@array/disphour"
             android:entryValues="@array/disphour_value"
-            android:defaultValue="6"
+            android:defaultValue="12"
             />
         <ListPreference
             android:key="updatetime"
             android:title="@string/updatetime"
+            android:summary="@string/updatetime"
+            android:dialogTitle="@string/updatetime"
             android:entries="@array/updatetime"
             android:entryValues="@array/updatetime_value"
             android:defaultValue="15"

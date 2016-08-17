@@ -9,7 +9,7 @@
         <item>11時間</item>
         <item>12時間</item>
     </string-array>
-    <integer-array name="disphour_value">
+    <string-array name="disphour_value">
         <item>6</item>
         <item>7</item>
         <item>8</item>
@@ -17,7 +17,7 @@
         <item>10</item>
         <item>11</item>
         <item>12</item>
-    </integer-array>
+    </string-array>
     <string-array name="updatetime">
         <item>0分</item>
         <item>5分</item>
@@ -32,7 +32,7 @@
         <item>50分</item>
         <item>55分</item>
     </string-array>
-    <integer-array name="updatetime_value">
+    <string-array name="updatetime_value">
         <item>0</item>
         <item>5</item>
         <item>10</item>
@@ -45,5 +45,5 @@
         <item>45</item>
         <item>50</item>
         <item>55</item>
-    </integer-array>
+    </string-array>
 </resources>

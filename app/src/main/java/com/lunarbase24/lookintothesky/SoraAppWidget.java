@@ -219,14 +219,13 @@ public class SoraAppWidget extends AppWidgetProvider {
         // アラーム受信 更新処理（onUpdateでなくここで処理をする、アラーム処理と内容が同じなので）
         if (intent.getAction().equals(ACTION_START_MY_ALARM) ||
                 intent.getAction().equals(ACTION_START) ||
-                intent.getAction().equals(ACTION_CHANGE_SETTING) ||
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-            int nDispHour = sharedPref.getInt("disphour_preference", 6);
+            String DispHour = sharedPref.getString("disphour_preference", "6");
 
-            Toast toast = Toast.makeText(context, String.format("%s %d", intent.getAction(), nDispHour), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(context, String.format("%s %s", intent.getAction(), DispHour), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
             toast.show();
 
