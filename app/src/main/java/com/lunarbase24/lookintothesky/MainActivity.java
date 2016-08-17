@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // SettingActivityの初期化
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         try {
             Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
             if (myToolbar != null) {

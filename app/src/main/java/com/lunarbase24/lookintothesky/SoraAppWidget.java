@@ -8,6 +8,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -17,6 +18,7 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -221,7 +223,10 @@ public class SoraAppWidget extends AppWidgetProvider {
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
-            Toast toast = Toast.makeText(context, String.format("%s", intent.getAction()), Toast.LENGTH_SHORT);
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            int nDispHour = sharedPref.getInt("disphour_preference", 6);
+
+            Toast toast = Toast.makeText(context, String.format("%s %d", intent.getAction(), nDispHour), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
             toast.show();
 

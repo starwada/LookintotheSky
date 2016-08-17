@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="widget_settings"
+        android:title="@string/configure"
+        >
+        <ListPreference
+            android:key="disphour_preference"
+            android:title="@string/disphour"
+            android:entries="@array/disphour"
+            android:entryValues="@array/disphour_value"
+            android:defaultValue="6"
+            />
+        <ListPreference
+            android:key="updatetime"
+            android:title="@string/updatetime"
+            android:entries="@array/updatetime"
+            android:entryValues="@array/updatetime_value"
+            android:defaultValue="15"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

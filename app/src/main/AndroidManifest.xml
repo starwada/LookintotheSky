@@ -30,6 +30,7 @@
                 android:value="com.lunarbase24.lookintothesky.MainActivity" />
         </activity>
         <activity android:name=".SettingActivity"
+            android:label="@string/menu_setting"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

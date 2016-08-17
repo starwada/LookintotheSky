@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="disphour">
+        <item>6時間</item>
+        <item>7時間</item>
+        <item>8時間</item>
+        <item>9時間</item>
+        <item>10時間</item>
+        <item>11時間</item>
+        <item>12時間</item>
+    </string-array>
+    <integer-array name="disphour_value">
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </integer-array>
+    <string-array name="updatetime">
+        <item>0分</item>
+        <item>5分</item>
+        <item>10分</item>
+        <item>15分</item>
+        <item>20分</item>
+        <item>25分</item>
+        <item>30分</item>
+        <item>35分</item>
+        <item>40分</item>
+        <item>45分</item>
+        <item>50分</item>
+        <item>55分</item>
+    </string-array>
+    <integer-array name="updatetime_value">
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>35</item>
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+        <item>55</item>
+    </integer-array>
+</resources>
