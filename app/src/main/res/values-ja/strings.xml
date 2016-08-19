@@ -26,4 +26,8 @@
     <string name="graph">グラフ関連</string>
     <string name="graph_back">背景透過率</string>
     <string name="graph_radius">半径</string>
+    <string name="settings_summary_disphour">表示時間数</string>
+    <string name="settings_summary_updatetime">更新時間（分）</string>
+    <string name="settings_summary_transparency">グラフ背景の透過率</string>
+    <string name="settings_summary_dotradius">ドット半径</string>
 </resources>

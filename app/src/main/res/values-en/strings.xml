@@ -26,4 +26,8 @@
     <string name="graph">Graph</string>
     <string name="graph_back">Transparency</string>
     <string name="graph_radius">Radius</string>
+    <string name="settings_summary_disphour">number of display</string>
+    <string name="settings_summary_updatetime">update time(minutes)</string>
+    <string name="settings_summary_transparency">Transparency</string>
+    <string name="settings_summary_dotradius">dot radius</string>
 </resources>

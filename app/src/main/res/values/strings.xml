@@ -32,4 +32,8 @@
     <string name="graph">graph</string>
     <string name="graph_back">graph back</string>
     <string name="graph_radius">graph radius</string>
+    <string name="settings_summary_disphour">number of display</string>
+    <string name="settings_summary_updatetime">update time</string>
+    <string name="settings_summary_transparency">Transparency</string>
+    <string name="settings_summary_dotradius">dot radius</string>
 </resources>
