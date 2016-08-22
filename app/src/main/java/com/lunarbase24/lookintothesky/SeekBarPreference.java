@@ -6,8 +6,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -16,30 +14,108 @@ import android.widget.TextView;
  * Created by Wada on 2016/08/17.
  */
 public class SeekBarPreference extends DialogPreference {
-    private SeekBar mSeekBar;
-    private TextView mValueLabel;
 
-    private int mMin;
-    private int mMax;
-    private int mValue;
-    private String mValueFormat;
+    /**
+     * The default value of the seek bar.
+     */
+    protected static final int DEFAULT_VALUE = 50;
+
+    /**
+     * The default minimum value of the seek bar.
+     */
+    protected static final int DEFAULT_MIN_VALUE = 0;
+
+    /**
+     * The default maximum value of the seek bar.
+     */
+    protected static final int DEFAULT_MAX_VALUE = 100;
+
+    /**
+     * The default step size, the value is increased or decreased by when moving
+     * the seek bar.
+     */
+    protected static final int DEFAULT_STEP_SIZE = -1;
+
+    /**
+     * The default number of decimal numbers.
+     */
+    protected static final int DEFAULT_DECIMALS = 1;
+
+    /**
+     * The default value, which specifies, whether the currently persisted value
+     * should be shown instead of the summary, or not.
+     */
+    protected static final boolean DEFAULT_SHOW_VALUE_AS_SUMMARY = false;
+
+    /**
+     * The default value, which specifies, whether the progress of the seek bar
+     * should be shown, or not.
+     */
+    protected static final boolean DEFAULT_SHOW_PROGRESS = true;
+
+    /**
+     * The default, which are shown depending on the currently persisted value.
+     */
+    protected static final String[] DEFAULT_SUMMARIES = null;
+
+    /**
+     * The currently persisted value.
+     */
+    private int value;
+
+    /**
+     * The current value of the seek bar.
+     */
+    private int seekBarValue;
+
+    /**
+     * The maximum value of the seek bar.
+     */
+    private int minValue;
+
+    /**
+     * The minimum value of the seek bar.
+     */
+    private int maxValue;
+
+    /**
+     * The default value of the seek bar.
+     */
+    private float defaultValue;
+
+    /**
+     * The step size, the value is increased or decreased by when moving the
+     * seek bar.
+     */
+    private int stepSize;
+
+    /**
+     * The number of decimal numbers of the floating point numbers, the
+     * preference allows to choose.
+     */
+    private int decimals;
+
+    /**
+     * A string array, which contains the summaries, which should be shown
+     * depending on the currently persisted value.
+     */
+    private String[] summaries;
+
+    /**
+     * True, if the currently persisted value should be shown as the summary,
+     * instead of the given summaries, false otherwise.
+     */
+    private boolean showValueAsSummary;
+
+    /**
+     * True, if the progress of the seek bar should be shown, false otherwise.
+     */
+    private boolean showProgress;
 
     public SeekBarPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mSeekBar = new SeekBar(context, attrs);
-        // Give it an ID so it can be saved/restored
-        mSeekBar.setId(R.id.seek_bar);
-        mSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
-
-        TypedArray a =
-                context.obtainStyledAttributes(attrs, R.styleable.SeekBarPreference);
-        setMin(a.getInt(R.styleable.SeekBarPreference_min, mMin));
-        setMax(a.getInt(R.styleable.SeekBarPreference_max, mMax));
-        setValue(a.getInt(R.styleable.SeekBarPreference_value, mValue));
-        setValueFormat(a.getString(R.styleable.SeekBarPreference_valueFormat));
-
-        a.recycle();
+        obtainStyledAttributes(context, attrs);
 
         setDialogLayoutResource(R.layout.settings_seekbarpreference_layout);
         setPositiveButtonText(android.R.string.ok);
@@ -50,172 +126,171 @@ public class SeekBarPreference extends DialogPreference {
         this(context, null);
     }
 
-    /**
-     * Sets minimal value which can be set by this preference object.
-     *
-     * @param min
-     */
-    public void setMin(int min) {
-        mMin = min;
-        mSeekBar.setMax(mMax - mMin);
-        mSeekBar.setProgress(mMin);
-    }
-
-    /**
-     * Returns minimal value which can be set by this preference object.
-     *
-     * @return
-     */
-    public int getMin() {
-        return mMin;
-    }
-
-    /**
-     * Sets maximal value which can be set by this preference object.
-     *
-     * @param max
-     */
-    public void setMax(int max) {
-        mMax = max;
-        mSeekBar.setMax(mMax - mMin);
-        mSeekBar.setProgress(mMin);
-    }
-
-    /**
-     * Returns maximal value which can be set by this preference object.
-     *
-     * @return
-     */
-    public int getMax() {
-        return mMax;
-    }
-
-    /**
-     * Saves the value to the {@link SharedPreferences}.
-     */
-    public void setValue(int value) {
-        final boolean wasBlocking = shouldDisableDependents();
-
-        if (value > mMax) {
-            mValue = mMax;
-        } else if (value < mMin) {
-            mValue = mMin;
-        } else {
-            mValue = value;
-        }
-
-        persistInt(value);
-
-        final boolean isBlocking = shouldDisableDependents();
-        if (isBlocking != wasBlocking) {
-            notifyDependencyChange(isBlocking);
+    private void obtainStyledAttributes(final Context context, final AttributeSet attributeSet) {
+        TypedArray typedArray = context.obtainStyledAttributes(attributeSet,
+                R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference);
+        try {
+            obtainMaxValue(typedArray);
+            obtainMinValue(typedArray);
+            obtainDefaultValue(typedArray);
+        } finally {
+            typedArray.recycle();
         }
     }
 
-    /**
-     * Gets the value from the {@link SharedPreferences}.
-     *
-     * @return The current preference value.
-     */
-    public int getValue() {
-        return mValue;
+    private void obtainMinValue(final TypedArray typedArray) {
+        setMinValue(typedArray.getInteger(R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference_minValue, DEFAULT_MIN_VALUE));
     }
 
-    public void setValueFormat(String valueFormat) {
-        mValueFormat = valueFormat;
+    private void obtainMaxValue(final TypedArray typedArray) {
+        setMaxValue(typedArray.getInteger(R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference_maxValue, DEFAULT_MAX_VALUE));
     }
 
-    public String getValueFormat() {
-        return mValueFormat;
+    private void obtainDefaultValue(final TypedArray typedArray) {
+        defaultValue = typedArray.getInt(R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference_defaultValue, DEFAULT_VALUE);
+    }
+
+    public final int getValue() {
+        return value;
+    }
+
+    public final int getRange() {
+        return maxValue - minValue;
+    }
+
+    public final int getMinValue() {
+        return minValue;
+    }
+
+    public final int getMaxValue() {
+        return maxValue;
+    }
+
+    private String getProgressText() {
+        return String.format("%d", seekBarValue);
+    }
+
+    protected final int getSeekBarValue() {
+        return seekBarValue;
+    }
+
+    public final String[] getSummaries() {
+        return summaries;
+    }
+
+    public final void setValue(final int value) {
+        if (this.value != value) {
+            this.value = value;
+            this.seekBarValue = value;
+            persistInt(value);
+            notifyChanged();
+        }
+    }
+
+    public final void setMinValue(final int minValue) {
+        this.minValue = minValue;
+        setValue(Math.max(getValue(), minValue));
+    }
+
+    public final void setMaxValue(final int maxValue) {
+        this.maxValue = maxValue;
+        setValue(Math.min(getValue(), maxValue));
+    }
+
+    public final void setSummaries(final String[] summaries) {
+        this.summaries = summaries;
     }
 
     @Override
-    protected void onBindDialogView(View view) {
-        super.onBindDialogView(view);
-
-        mValueLabel = (TextView) view.findViewById(R.id.value);
-
-        SeekBar seekBar = mSeekBar;
-        seekBar.setProgress(getValue() - mMin);
-        updateValueLabel(seekBar.getProgress());
-
-
-        ViewParent oldParent = seekBar.getParent();
-        if (oldParent != view) {
-            if (oldParent != null) {
-                ((ViewGroup) oldParent).removeView(seekBar);
-            }
-            onAddSeekBarToDialogView(view, seekBar);
+    public final CharSequence getSummary() {
+        if (showValueAsSummary) {
+            return getProgressText();
+        } else if (getSummaries() != null && getSummaries().length > 0) {
+            float interval = (float) getRange() / (float) getSummaries().length;
+            int index = (int) Math.floor((getValue() - getMinValue())
+                    / interval);
+            index = Math.min(index, getSummaries().length - 1);
+            return getSummaries()[index];
+        } else {
+            return super.getSummary();
         }
     }
 
-    /**
-     * Adds the SeekBar widget of this preference to the dialog's view.
-     *
-     * @param dialogView The dialog view.
-     */
-    protected void onAddSeekBarToDialogView(View dialogView, SeekBar seekBar) {
-        ViewGroup container = (ViewGroup) dialogView
-                .findViewById(R.id.seek_bar_container);
-        if (container != null) {
-            container.addView(seekBar, ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
+    @Override
+    public final void setSummary(final CharSequence summary) {
+        super.setSummary(summary);
+        this.summaries = null;
+    }
+
+    @Override
+    public final void setSummary(final int summaryResId) {
+        try {
+            setSummaries(getContext().getResources().getStringArray(summaryResId));
+        } catch (Exception e) {
+            super.setSummary(summaryResId);
         }
     }
 
-    private OnSeekBarChangeListener mOnSeekBarChangeListener = new OnSeekBarChangeListener() {
+    @Override
+    protected final Object onGetDefaultValue(final TypedArray a, final int index) {
+        return a.getInt(index, DEFAULT_VALUE);
+    }
 
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
+    @Override
+    protected final void onSetInitialValue(final boolean restoreValue, final Object defaultValue) {
+        if (restoreValue) {
+            setValue(getPersistedInt(DEFAULT_VALUE));
+        } else {
+            setValue((int)defaultValue);
         }
+    }
 
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-        }
+    @Override
+    protected View onCreateDialogView() {
+        View dialogView = super.onCreateDialogView();
 
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress,
-                                      boolean fromUser) {
-            updateValueLabel(progress);
-        }
+        TextView progressTextView = (TextView) dialogView.findViewById(R.id.current_value);
+        progressTextView.setText(getProgressText());
 
-    };
+        SeekBar seekBar = (SeekBar) dialogView.findViewById(R.id.seek_bar);
+        seekBar.setMax(getRange());
+        seekBar.setProgress(Math.round((getValue() - getMinValue())));
+        seekBar.setOnSeekBarChangeListener(getSeekBarListener(progressTextView));
 
-    private void updateValueLabel(int progress) {
-        if (mValueLabel != null) {
-            int value = progress + mMin;
-            if (mValueFormat != null && mValueFormat != "") {
-                mValueLabel.setText(String.format(mValueFormat, value));
-            } else {
-                mValueLabel.setText(String.valueOf(value));
+        return dialogView;
+    }
+
+    private SeekBar.OnSeekBarChangeListener getSeekBarListener(
+            final TextView progressTextView) {
+        return new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(final SeekBar seekBar) {
+                return;
             }
-        }
+
+            @Override
+            public void onStartTrackingTouch(final SeekBar seekBar) {
+                return;
+            }
+
+            @Override
+            public void onProgressChanged(final SeekBar seekBar, final int progress, final boolean fromUser) {
+                seekBarValue = getMinValue() + progress;
+                progressTextView.setText(getProgressText());
+            }
+        };
     }
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         super.onDialogClosed(positiveResult);
 
-        if (positiveResult) {
-            int progress = mSeekBar.getProgress() + mMin;
-            if (callChangeListener(progress)) {
-                setValue(progress);
-            }
+        if (positiveResult && callChangeListener(seekBarValue)) {
+            setValue(seekBarValue);
+        } else {
+            seekBarValue = getValue();
         }
-    }
-
-    @Override
-    protected Object onGetDefaultValue(TypedArray a, int index) {
-        return a.getString(index);
-    }
-
-    @Override
-    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
-        int defValue = mMin;
-        if (defaultValue != null) {
-            defValue = Integer.parseInt(defaultValue.toString());
-        }
-        setValue(restoreValue ? getPersistedInt(mValue) : defValue);
     }
 
     @Override
