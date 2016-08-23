@@ -31,29 +31,6 @@ public class SeekBarPreference extends DialogPreference {
     protected static final int DEFAULT_MAX_VALUE = 100;
 
     /**
-     * The default step size, the value is increased or decreased by when moving
-     * the seek bar.
-     */
-    protected static final int DEFAULT_STEP_SIZE = -1;
-
-    /**
-     * The default number of decimal numbers.
-     */
-    protected static final int DEFAULT_DECIMALS = 1;
-
-    /**
-     * The default value, which specifies, whether the currently persisted value
-     * should be shown instead of the summary, or not.
-     */
-    protected static final boolean DEFAULT_SHOW_VALUE_AS_SUMMARY = false;
-
-    /**
-     * The default value, which specifies, whether the progress of the seek bar
-     * should be shown, or not.
-     */
-    protected static final boolean DEFAULT_SHOW_PROGRESS = true;
-
-    /**
      * The default, which are shown depending on the currently persisted value.
      */
     protected static final String[] DEFAULT_SUMMARIES = null;
@@ -81,19 +58,7 @@ public class SeekBarPreference extends DialogPreference {
     /**
      * The default value of the seek bar.
      */
-    private float defaultValue;
-
-    /**
-     * The step size, the value is increased or decreased by when moving the
-     * seek bar.
-     */
-    private int stepSize;
-
-    /**
-     * The number of decimal numbers of the floating point numbers, the
-     * preference allows to choose.
-     */
-    private int decimals;
+    private int defaultValue;
 
     /**
      * A string array, which contains the summaries, which should be shown
@@ -101,21 +66,11 @@ public class SeekBarPreference extends DialogPreference {
      */
     private String[] summaries;
 
-    /**
-     * True, if the currently persisted value should be shown as the summary,
-     * instead of the given summaries, false otherwise.
-     */
-    private boolean showValueAsSummary;
-
-    /**
-     * True, if the progress of the seek bar should be shown, false otherwise.
-     */
-    private boolean showProgress;
-
     public SeekBarPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         obtainStyledAttributes(context, attrs);
+        setValue(getPersistedInt(defaultValue));
 
         setDialogLayoutResource(R.layout.settings_seekbarpreference_layout);
         setPositiveButtonText(android.R.string.ok);
@@ -133,6 +88,7 @@ public class SeekBarPreference extends DialogPreference {
             obtainMaxValue(typedArray);
             obtainMinValue(typedArray);
             obtainDefaultValue(typedArray);
+            obtainSummaries(typedArray);
         } finally {
             typedArray.recycle();
         }
@@ -147,7 +103,21 @@ public class SeekBarPreference extends DialogPreference {
     }
 
     private void obtainDefaultValue(final TypedArray typedArray) {
-        defaultValue = typedArray.getInt(R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference_defaultValue, DEFAULT_VALUE);
+        defaultValue = typedArray.getInt(R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference_android_defaultValue, DEFAULT_VALUE);
+    }
+
+    private void obtainSummaries(final TypedArray typedArray) {
+        try {
+            CharSequence[] charSequences = typedArray.getTextArray(R.styleable.com_lunarbase24_lookintothesky_SeekBarPreference_android_summary);
+
+            String[] obtainedSummaries = new String[charSequences.length];
+            for (int i = 0; i < charSequences.length; i++) {
+                obtainedSummaries[i] = charSequences[i].toString();
+            }
+            setSummaries(obtainedSummaries);
+        } catch (NullPointerException e) {
+            setSummaries(DEFAULT_SUMMARIES);
+        }
     }
 
     public final int getValue() {
@@ -203,17 +173,7 @@ public class SeekBarPreference extends DialogPreference {
 
     @Override
     public final CharSequence getSummary() {
-        if (showValueAsSummary) {
-            return getProgressText();
-        } else if (getSummaries() != null && getSummaries().length > 0) {
-            float interval = (float) getRange() / (float) getSummaries().length;
-            int index = (int) Math.floor((getValue() - getMinValue())
-                    / interval);
-            index = Math.min(index, getSummaries().length - 1);
-            return getSummaries()[index];
-        } else {
-            return super.getSummary();
-        }
+        return String.format("%s:%s", super.getSummary(), getProgressText());
     }
 
     @Override
@@ -251,6 +211,11 @@ public class SeekBarPreference extends DialogPreference {
 
         TextView progressTextView = (TextView) dialogView.findViewById(R.id.current_value);
         progressTextView.setText(getProgressText());
+
+        TextView minView = (TextView) dialogView.findViewById(R.id.min_value);
+        minView.setText(String.format("%d", minValue));
+        TextView maxView = (TextView) dialogView.findViewById(R.id.max_value);
+        maxView.setText(String.format("%d", maxValue));
 
         SeekBar seekBar = (SeekBar) dialogView.findViewById(R.id.seek_bar);
         seekBar.setMax(getRange());

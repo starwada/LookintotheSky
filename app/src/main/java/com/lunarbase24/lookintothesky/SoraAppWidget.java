@@ -60,17 +60,18 @@ public class SoraAppWidget extends AppWidgetProvider {
     private final long interval = 60 * 60 * 1000;
     private long alarmtime = 30 * 60 * 1000;  // アラーム設定分
 
+    public static AppSettings mSettings = new AppSettings();
+
+    public static AppSettings getSetting(){
+        return mSettings;
+    }
+
     // 表示区分 PM2.5 OX（光化学オキシダント） WS（風速）
     // GraphFactoryにも同様に定義している
     private static final float mDotY[][] = { {10.0f, 15.0f, 35.0f, 50.0f, 70.0f, 100.0f },
             {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
             {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
 
-    public static AppSettings mSettings;
-
-    public static AppSettings getSetting(){
-        return mSettings;
-    }
     // 以下はシステムのタイミングで呼ばれる
     // 最初、ウィジットを画面に配置する際に設定アクティビティよりも先に呼ばれる。
     // 後は、システムのタイミング
@@ -219,20 +220,21 @@ public class SoraAppWidget extends AppWidgetProvider {
         // アラーム受信 更新処理（onUpdateでなくここで処理をする、アラーム処理と内容が同じなので）
         if (intent.getAction().equals(ACTION_START_MY_ALARM) ||
                 intent.getAction().equals(ACTION_START) ||
+                intent.getAction().equals(ACTION_CHANGE_SETTING) ||
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-            String DispHour = sharedPref.getString("disphour_preference", "6");
+            if(mSettings == null){ mSettings = new AppSettings(); }
+            mSettings.m_nDispHour = Integer.parseInt(sharedPref.getString("disphour_preference", "11"));
+            mSettings.m_nUpdateTime = Integer.parseInt(sharedPref.getString("updatetime", "15"));
+            mSettings.m_nTransp = sharedPref.getInt("seekbar_transparency", 125);
+            mSettings.m_fRadius = (float)sharedPref.getInt("seekbar_dotradius", 8);
 
-            Toast toast = Toast.makeText(context, String.format("%s %s", intent.getAction(), DispHour), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(context, String.format("%s", intent.getAction()), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
             toast.show();
 
-            if( intent.getAction().equals(ACTION_CHANGE_SETTING)) {
-                mSettings = (AppSettings) context.getApplicationContext();
-            }
-            if(mSettings == null){ return; }
             alarmtime = mSettings.m_nUpdateTime * 60 * 1000;
             // 初回配置時にIDとデータ種別を保持
             if (intent.getAction().equals(ACTION_START) ){

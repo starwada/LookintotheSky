@@ -30,4 +30,5 @@
     <string name="settings_summary_updatetime">更新時間（分）</string>
     <string name="settings_summary_transparency">グラフ背景の透過率</string>
     <string name="settings_summary_dotradius">ドット半径</string>
+    <string name="unit_minutes">分</string>
 </resources>

@@ -30,4 +30,5 @@
     <string name="settings_summary_updatetime">update time(minutes)</string>
     <string name="settings_summary_transparency">Transparency</string>
     <string name="settings_summary_dotradius">dot radius</string>
+    <string name="unit_minutes">minutes</string>
 </resources>
