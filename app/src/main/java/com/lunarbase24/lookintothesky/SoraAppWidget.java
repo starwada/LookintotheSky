@@ -15,15 +15,23 @@ import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.Layout;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -173,6 +181,9 @@ public class SoraAppWidget extends AppWidgetProvider {
             fSize = 28.0f;
             nTypeface = Typeface.NORMAL;
         }
+        String strShared;   // 共有時の文字列　観測局名 データ種別 日付 値 Twitterを想定
+        strShared = String.format(Locale.JAPANESE, "%s %s\n%s %s #空見てごらん",
+                soramame.getMstName(), (type == 0 ? "PM2.5" : "   OX"), soramame.getData().get(0).getCalendarString(), widgetText);
 
         // 計測値にスタイルを適用したいため、以下を使用。
         // "未計測"をイタリックにすると、wrap_contentにて端が表示されないので、スタイルを変更する。
@@ -194,9 +205,18 @@ public class SoraAppWidget extends AppWidgetProvider {
         // to the button
         image.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
         // 共有（トーストを表示するだけ、今のところ）
-        Intent shareIntent = new Intent(context, SoraAppWidget.class);
-        shareIntent.setAction(ACTION_START_SHARE);
-        PendingIntent operation = PendingIntent.getBroadcast(context, appWidgetId, shareIntent, 0);
+//        Intent shareIntent = new Intent(context, SoraAppWidget.class);
+//        shareIntent.setAction(ACTION_START_SHARE);
+//        PendingIntent operation = PendingIntent.getBroadcast(context, appWidgetId, shareIntent, 0);
+        // 2016/09/02 共有はツィッターにて
+        Intent shareintent = new Intent();
+        shareintent.setAction(Intent.ACTION_SEND);
+        shareintent.setPackage("com.twitter.android");
+        shareintent.setType("image/png");
+        shareintent.putExtra(Intent.EXTRA_TEXT, strShared);
+        shareintent.putExtra(Intent.EXTRA_STREAM, Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
+                String.format("/soracapture_%d_%d.png", appWidgetId, type)));
+        PendingIntent operation = PendingIntent.getActivity(context, appWidgetId, shareintent, 0);
         image.setOnClickPendingIntent(R.id.shareButton, operation);
         // 更新
         Intent updateIntent = new Intent(context, SoraAppWidget.class);
@@ -224,6 +244,8 @@ public class SoraAppWidget extends AppWidgetProvider {
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
+
+            // 設定データ取得
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
             if(mSettings == null){ mSettings = new AppSettings(); }
             mSettings.m_nDispHour = Integer.parseInt(sharedPref.getString("disphour_preference", "11"));
@@ -231,9 +253,11 @@ public class SoraAppWidget extends AppWidgetProvider {
             mSettings.m_nTransp = sharedPref.getInt("seekbar_transparency", 125);
             mSettings.m_fRadius = (float)sharedPref.getInt("seekbar_dotradius", 8);
 
+            // debug start
             Toast toast = Toast.makeText(context, String.format("%s", intent.getAction()), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
             toast.show();
+            // debug end
 
             alarmtime = mSettings.m_nUpdateTime * 60 * 1000;
             // 初回配置時にIDとデータ種別を保持
