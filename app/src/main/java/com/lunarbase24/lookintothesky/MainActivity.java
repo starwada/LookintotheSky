@@ -590,6 +590,7 @@ public class MainActivity extends AppCompatActivity {
                         soramame.addAll(0, aData.getData());
                     }
                 }
+                // DBの古いデータは削除する
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

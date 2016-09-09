@@ -270,12 +270,6 @@ public class SoraAppWidget extends AppWidgetProvider {
 //            }
             setAlarm(context);
         }
-        // 共有受信
-        if (intent.getAction().equals(ACTION_START_SHARE)) {
-            Toast toast = Toast.makeText(context, "Share", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
-            toast.show();
-        }
     }
 
     // アラーム設定（これをその都度呼び出している）
