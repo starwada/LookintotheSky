@@ -154,7 +154,7 @@ public class GraphFactory {
             float fradius = settings.m_fRadius;
             float fOXY[] = { 0.0f, 0.0f  };
             for( Soramame.SoramameData data : list){
-                if( nCount > mDispHour){ break; }
+                if( nCount >= mDispHour){ break; }
                 //if( mDispDay != 0 && nCount > mDispDay*24 ){ break; }
                 switch(mMode){
                     case 0:
