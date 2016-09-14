@@ -127,6 +127,9 @@ public class SelectStationActivity extends AppCompatActivity {
             /*リフレッシュした時の通信処理を書く*/
             // カレント都道府県の測定局データをDBから削除して、新たに取得
             //updateData();
+            SoramameAccessor.deletePref(SelectStationActivity.this, mPref);
+            // DBから削除した後に、再度取得する。
+            new SoraStation().execute();
 
             //setRefreshing(false)でグルグル終了できる
             mSwipeRefreshLayout.setRefreshing(false);
@@ -343,6 +346,8 @@ public class SelectStationActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params)
         {
+            SoramameAccessor.getPref(SelectStationActivity.this, mPref, mList);
+//            return null;
             // テストで、データをDBに保存する。都道府県単位か全国か。
             // 既存DBに保存されているかをチェック。
             try
