@@ -96,7 +96,7 @@ public class SelectStationActivity extends AppCompatActivity {
                         setSelectedStation();
 
                         // 選択都道府県での測定局データ取得
-                        new SoraStation().execute();
+                        new SoraStation().execute(false);
                     }
 
                     @Override
@@ -118,18 +118,15 @@ public class SelectStationActivity extends AppCompatActivity {
         }catch(NullPointerException e){
             e.printStackTrace();
         }
-
     }
+
     //swipeでリフレッシュした時の通信処理とグルグルを止める設定を書く
     private SwipeRefreshLayout.OnRefreshListener mOnRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
             /*リフレッシュした時の通信処理を書く*/
-            // カレント都道府県の測定局データをDBから削除して、新たに取得
-            //updateData();
-            SoramameAccessor.deletePref(SelectStationActivity.this, mPref);
             // DBから削除した後に、再度取得する。
-            new SoraStation().execute();
+            new SoraStation().execute(true);
 
             //setRefreshing(false)でグルグル終了できる
             mSwipeRefreshLayout.setRefreshing(false);
@@ -321,16 +318,9 @@ public class SelectStationActivity extends AppCompatActivity {
     }
 
     // 都道府県の測定局データ取得
-    private class SoraStation extends AsyncTask<Void, Void, Void>
+    private class SoraStation extends AsyncTask<Boolean, Void, Void>
     {
-        String url;
-        String strOX;           // OX
-        String strPM25;     // PM2.5
-        String strWD;       // 風向
         ProgressDialog mProgressDialog;
-
-        SoramameSQLHelper mDbHelper = new SoramameSQLHelper(SelectStationActivity.this);
-        SQLiteDatabase mDb = null;
 
         @Override
         protected void onPreExecute()
@@ -344,115 +334,16 @@ public class SelectStationActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params)
+        protected Void doInBackground(Boolean... params)
         {
-            SoramameAccessor.getPref(SelectStationActivity.this, mPref, mList);
-//            return null;
             // テストで、データをDBに保存する。都道府県単位か全国か。
             // 既存DBに保存されているかをチェック。
-            try
-            {
-                // まず、DBをチェックする。
-                mDb = mDbHelper.getReadableDatabase();
-                if( !mDb.isOpen() ){ return null; }
-
-                String[] selectionArgs = { String.valueOf(mPref)};
-                Cursor c = mDb.query(SoramameContract.FeedEntry.TABLE_NAME, null,
-                        SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE + " = ?",  selectionArgs, null, null, null);
-                if( c.getCount() > 0 )
-                {
-                    // DBにデータがあれば、DBから取得する。
-                    if( c.moveToFirst() ) {
-                        if(mList != null) {
-                            mList.clear();
-                        }
-                        mList = new ArrayList<Soramame>();
-                        while (true) {
-                            Soramame mame = new Soramame(
-                                    c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_CODE)),
-                                    c.getString(c.getColumnIndexOrThrow( SoramameContract.FeedEntry.COLUMN_NAME_STATION)),
-                                    c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS)));
-                            mame.setAllow(
-                                    c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_OX)),
-                                    c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_PM25)),
-                                    c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_WD))
-                            );
-                            mame.setSelected(c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_SEL)));
-                            mList.add(mame);
-
-                            if( !c.moveToNext()){ break; }
-                        }
-                    }
-                    c.close();
-                    mDb.close();
-                    return null;
-                }
-                c.close();
-                mDb.close();
-
-                // DBに無ければ、検索してDBに登録する。
-                mDb = mDbHelper.getWritableDatabase();
-
-                url = String.format(Locale.ENGLISH, "%s%s%d", SORABASEURL, SORAPREFURL, mPref);
-                Document doc = Jsoup.connect(url).get();
-                Elements elements = doc.getElementsByAttributeValue("name", "Hyou");
-                for( Element element : elements)
-                {
-                    if( element.hasAttr("src")) {
-                        url = element.attr("src");
-                        String soraurl = SORABASEURL + url;
-
-                        Document sora = Jsoup.connect(soraurl).get();
-                        Element body = sora.body();
-                        Elements tables = body.getElementsByTag("tr");
-                        url = "";
-                        Integer cnt = 0;
-                        if(mList != null) {
-                            mList.clear();
-                        }
-                        mList = new ArrayList<Soramame>();
-
-                        for( Element ta : tables) {
-                            if( cnt++ > 0) {
-                                Elements data = ta.getElementsByTag("td");
-                                // 測定対象取得 OX(8)、PM2.5(13)、風向(15)
-                                // 想定は○か✕
-                                strOX = data.get(8).text();
-                                strPM25 = data.get(13).text();
-                                strWD = data.get(15).text();
-                                // 最後のデータが空なので
-                                if(strPM25.length() < 1){ break; }
-
-                                int nCode = strPM25.codePointAt(0);
-                                // PM2.5測定局のみ ○のコード(9675)
-                                //if( nCode == 9675 ) {
-                                Soramame ent = new Soramame(Integer.parseInt(data.get(0).text()), data.get(1).text(), data.get(2).text());
-                                if(ent.setAllow(strOX, strPM25, strWD)){
-                                    mList.add(ent);
-
-                                    // 測定局DBに保存
-                                    ContentValues values = new ContentValues();
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_IND, cnt);
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_STATION, data.get(1).text());
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_CODE, Integer.valueOf(data.get(0).text()));
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS, data.get(2).text());
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE, mPref);
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_OX, ent.getAllow(0) ? 1: 0);
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_PM25, ent.getAllow(1) ? 1 : 0);
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_WD, ent.getAllow(2) ? 1 : 0);
-                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_SEL, 0);
-                                    // 重複は追加しない
-                                    long newRowId = mDb.insertWithOnConflict(SoramameContract.FeedEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
-                                }
-                                //}
-                            }
-                        }
-                    }
-                }
+            // 新規か更新か
+            if( !params[0]) {
+                mList = SoramameAccessor.getPref(SelectStationActivity.this, mPref);
             }
-            catch(IOException e)
-            {
-                e.printStackTrace();
+            else{
+                mList = SoramameAccessor.updatePref(SelectStationActivity.this, mPref);
             }
             return null;
         }
@@ -460,7 +351,6 @@ public class SelectStationActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result)
         {
-            if( mDb.isOpen()){ mDb.close(); }
             // 測定局データ取得後にリスト表示
             ListView station = (ListView) findViewById(R.id.MonitorStation_selview);
             if(mList != null && station != null)

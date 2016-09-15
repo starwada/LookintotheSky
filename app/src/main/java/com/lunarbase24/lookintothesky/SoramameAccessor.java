@@ -247,15 +247,15 @@ public class SoramameAccessor {
     // まずDBをクエリーし、なければWebから取得しDBに登録する。
     // int nPref 都道府県コード
     // ArrayList<Soramame> 測定局データリスト
-    public static int getPref(Context context, int nPrefCode, ArrayList<Soramame> list) {
-        int rc = 0;
+    public static ArrayList<Soramame> getPref(Context context, int nPrefCode) {
+        ArrayList<Soramame> list = null;
         SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
         SQLiteDatabase Db = null;
         try {
             // まず、DBをチェックする。
             Db = DbHelper.getReadableDatabase();
             if (!Db.isOpen()) {
-                return -1;
+                return null;
             }
 
             String[] selectionArgs = {String.valueOf(nPrefCode)};
@@ -264,9 +264,6 @@ public class SoramameAccessor {
             if (c.getCount() > 0) {
                 // DBにデータがあれば、DBから取得する。
                 if (c.moveToFirst()) {
-                    if (list != null) {
-                        list.clear();
-                    }
                     list = new ArrayList<Soramame>();
                     while (true) {
                         Soramame mame = new Soramame(
@@ -288,14 +285,14 @@ public class SoramameAccessor {
                 }
                 c.close();
                 Db.close();
-                return rc;
+                return list;
             }
             c.close();
             Db.close();
 
             // DBに無ければ、検索してDBに登録する。
             Db = DbHelper.getWritableDatabase();
-            rc = getPrefWeb(Db, nPrefCode, list);
+            list = getPrefWeb(Db, nPrefCode, false);
         }
         catch (SQLiteException e){
             e.printStackTrace();
@@ -304,26 +301,24 @@ public class SoramameAccessor {
             Db.close();
         }
 
-        return rc;
+        return list;
     }
 
-    // 測定局削除
-    // 指定都道府県の測定局データを削除する
+    // 測定局更新
+    // 指定都道府県の測定局データをWebより再取得し、既存DB内容を更新する。
     // 測定局データも更新されることがあるので。
-    public static int deletePref(Context context, int nPrefCode){
+    public static ArrayList<Soramame> updatePref(Context context, int nPrefCode){
         int rc = 0;
+        ArrayList<Soramame> list = null;
         SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
         SQLiteDatabase Db = null;
         try {
             // まず、DBをチェックする。
             Db = DbHelper.getWritableDatabase();
             if (!Db.isOpen()) {
-                return -1;
+                return null;
             }
-
-            String[] selectionArgs = {String.valueOf(nPrefCode)};
-            rc = Db.delete(SoramameContract.FeedEntry.TABLE_NAME,
-                    SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE + " = ?", selectionArgs);
+            list = getPrefWeb(Db, nPrefCode, true);
         }
         catch (SQLiteException e){
             e.printStackTrace();
@@ -332,82 +327,103 @@ public class SoramameAccessor {
             Db.close();
         }
 
-        return rc;
+        return list;
     }
 
-    public static int getPrefWeb(SQLiteDatabase Db, int nPrefCode, ArrayList<Soramame> list){
-        int rc = 0;
+    // 指定都道府県の測定局データをWebにて取得
+    public static ArrayList<Soramame> getPrefWeb(SQLiteDatabase Db, int nPrefCode, boolean bUpdate){
+        ArrayList<Soramame> list = null;
         try{
-        // DBに無ければ、検索してDBに登録する。
-        String strOX;
-        String strPM25;
-        String strWD;
+            // DBに無ければ、検索してDBに登録する。
+            String strOX;
+            String strPM25;
+            String strWD;
+            String url = String.format(Locale.ENGLISH, "%s%s%d", SORABASEURL, SORAPREFURL, nPrefCode);
+            Document doc = Jsoup.connect(url).get();
+            Elements elements = doc.getElementsByAttributeValue("name", "Hyou");
+            for (Element element : elements) {
+                if (element.hasAttr("src")) {
+                    url = element.attr("src");
+                    String soraurl = SORABASEURL + url;
 
-        String url = String.format(Locale.ENGLISH, "%s%s%d", SORABASEURL, SORAPREFURL, nPrefCode);
-        Document doc = Jsoup.connect(url).get();
-        Elements elements = doc.getElementsByAttributeValue("name", "Hyou");
-        for (Element element : elements) {
-            if (element.hasAttr("src")) {
-                url = element.attr("src");
-                String soraurl = SORABASEURL + url;
+                    Document sora = Jsoup.connect(soraurl).get();
+                    Element body = sora.body();
+                    Elements tables = body.getElementsByTag("tr");
+                    url = "";
+                    Integer cnt = 0;
+                    if (list != null) {
+                        list.clear();
+                    }
+                    list = new ArrayList<Soramame>();
 
-                Document sora = Jsoup.connect(soraurl).get();
-                Element body = sora.body();
-                Elements tables = body.getElementsByTag("tr");
-                url = "";
-                Integer cnt = 0;
-                if (list != null) {
-                    list.clear();
-                }
-                list = new ArrayList<Soramame>();
+                    int rows = 0;
+                    for (Element ta : tables) {
+                        if (cnt++ > 0) {
+                            Elements data = ta.getElementsByTag("td");
+                            // 測定対象取得 OX(8)、PM2.5(13)、風向(15)
+                            // 想定は○か✕
+                            strOX = data.get(8).text();
+                            strPM25 = data.get(13).text();
+                            strWD = data.get(15).text();
+                            // 最後のデータが空なので
+                            if (strPM25.length() < 1) {
+                                break;
+                            }
 
-                for (Element ta : tables) {
-                    if (cnt++ > 0) {
-                        Elements data = ta.getElementsByTag("td");
-                        // 測定対象取得 OX(8)、PM2.5(13)、風向(15)
-                        // 想定は○か✕
-                        strOX = data.get(8).text();
-                        strPM25 = data.get(13).text();
-                        strWD = data.get(15).text();
-                        // 最後のデータが空なので
-                        if (strPM25.length() < 1) {
-                            break;
+                            int nCode = strPM25.codePointAt(0);
+                            // PM2.5測定局のみ ○のコード(9675)
+                            //if( nCode == 9675 ) {
+                            Soramame ent = new Soramame(Integer.parseInt(data.get(0).text()), data.get(1).text(), data.get(2).text());
+                            if (ent.setAllow(strOX, strPM25, strWD)) {
+                                // ここで、登録か更新か処理を分ける。更新は今のところ、住所のみ？
+                                // bUpdate
+                                // 測定局DBに保存
+                                ContentValues values = new ContentValues();
+                                values.put(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS, data.get(2).text());
+                                if(!bUpdate) {
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_IND, cnt);
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_STATION, data.get(1).text());
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_CODE, Integer.valueOf(data.get(0).text()));
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE, nPrefCode);
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_OX, ent.getAllow(0) ? 1 : 0);
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_PM25, ent.getAllow(1) ? 1 : 0);
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_WD, ent.getAllow(2) ? 1 : 0);
+                                    values.put(SoramameContract.FeedEntry.COLUMN_NAME_SEL, 0);
+                                    // 重複は追加しない
+                                    long newRowId = Db.insertWithOnConflict(SoramameContract.FeedEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                                }
+                                // 更新
+                                else{
+                                    String strWhereCause;
+                                    strWhereCause = SoramameContract.FeedEntry.COLUMN_NAME_CODE + " = ?";
+                                    String strWhereArg[] = {data.get(0).text()};
+                                    rows = Db.update(SoramameContract.FeedEntry.TABLE_NAME, values, strWhereCause, strWhereArg);
+                                    if(rows > 0){
+                                        // 選択状態を復帰させる
+                                        Cursor c = Db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
+                                                SoramameContract.FeedEntry.COLUMN_NAME_CODE + " = ?", strWhereArg, null, null, null);
+                                        if(c.getCount() > 0 && c.moveToFirst()){
+                                            ent.setSelected(c.getInt(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_SEL)));
+                                        }
+                                        c.close();
+                                    }
+                                }
+                                // ここで、表示用のリストに追加する
+                                list.add(ent);
+                            }
+                            //}
                         }
-
-                        int nCode = strPM25.codePointAt(0);
-                        // PM2.5測定局のみ ○のコード(9675)
-                        //if( nCode == 9675 ) {
-                        Soramame ent = new Soramame(Integer.parseInt(data.get(0).text()), data.get(1).text(), data.get(2).text());
-                        if (ent.setAllow(strOX, strPM25, strWD)) {
-                            list.add(ent);
-
-                            // 測定局DBに保存
-                            ContentValues values = new ContentValues();
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_IND, cnt);
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_STATION, data.get(1).text());
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_CODE, Integer.valueOf(data.get(0).text()));
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS, data.get(2).text());
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE, nPrefCode);
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_OX, ent.getAllow(0) ? 1 : 0);
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_PM25, ent.getAllow(1) ? 1 : 0);
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_WD, ent.getAllow(2) ? 1 : 0);
-                            values.put(SoramameContract.FeedEntry.COLUMN_NAME_SEL, 0);
-                            // 重複は追加しない
-                            long newRowId = Db.insertWithOnConflict(SoramameContract.FeedEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
-                        }
-                        //}
                     }
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-    catch (SQLiteException e){
-        e.printStackTrace();
-    }
+        catch (SQLiteException e){
+            e.printStackTrace();
+        }
 
-    return rc;
+        return list;
     }
 
     // 計測データテーブル関係
