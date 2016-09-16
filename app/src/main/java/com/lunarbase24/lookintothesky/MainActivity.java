@@ -531,8 +531,8 @@ public class MainActivity extends AppCompatActivity {
                 for (Soramame soramame : mList) {
                     // 計測時間との差をみる、データが存在しない場合もfalseとなる。
                     // 内部データ（mList）が有効な場合は不要なDBアクセスもしない。
-                    // 次の更新まで9０分程度と想定、比較先は１時間前のデータなので、トータルで１５０分と設定する。
-                    if (soramame.isLoaded(now, 150)) {
+                    // 次の更新まで75分程度と想定、比較先は１時間前のデータなので、トータルで135分と設定する。
+                    if (soramame.isLoaded(now, 135)) {
                         continue;
                     }
                     // ここで、指定測定局のデータがDBにあるかチェックする
@@ -540,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
                     rc = checkDB(soramame, mDb);
                     if (rc != 1) {
                         // DBからデータは取得したが、現在時間とのチェックを行う。
-                        if (soramame.isLoaded(now, 150)) {
+                        if (soramame.isLoaded(now, 135)) {
                             continue;
                         }
                     }

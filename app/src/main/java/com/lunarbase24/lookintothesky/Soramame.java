@@ -153,6 +153,7 @@ public class Soramame implements Parcelable{
         {
             return m_dDate;
         }
+        public void setDate(GregorianCalendar date){ m_dDate = date; }
         public String getCalendarString(){
             return String.format("%s/%s/%s %s時",
                     m_dDate.get(Calendar.YEAR), m_dDate.get(Calendar.MONTH)+1, m_dDate.get(Calendar.DAY_OF_MONTH), m_dDate.get(Calendar.HOUR_OF_DAY));
@@ -192,6 +193,13 @@ public class Soramame implements Parcelable{
         public String Format()
         {
             return String.format("%s:%s", getCalendarString(), getPM25String()) ;
+        }
+
+        public void clearData(){
+            m_fOX = 0.0f;
+            m_nPM25 = 0;
+            m_nWD = 0;
+            m_fWS = 0.0f;
         }
     }
 

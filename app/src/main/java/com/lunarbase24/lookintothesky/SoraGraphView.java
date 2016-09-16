@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.provider.CalendarContract;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -22,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 
@@ -40,6 +42,7 @@ public class SoraGraphView extends View {
     private float mTextHeight;
 
     private Soramame mSoramame;     // 測定局のPM2.5データ
+
     private float mMax[] = new float[3];  // 表示データのMAX
     private int mMaxTime[] = new int[3];    // 最大値の時間（インデックス）
     private float mAve[] = new float[3];    // 表示データの24時間平均値
@@ -173,18 +176,31 @@ public class SoraGraphView extends View {
         mSoramame = new Soramame(sora.getMstCode(), sora.getMstName(), sora.getAddress());
         ArrayList<Soramame.SoramameData> list = sora.getData();
         int nCount=0;
+        // ここで時間補完を行う。以下clone()しないと参照にてリストの日付が変わる。
+        // この処理はAdapterで行わないと、カードビューとの整合性が取れない。
+        GregorianCalendar curtime = (GregorianCalendar)list.get(0).getDate().clone();
         for( Soramame.SoramameData data : list){
             // それぞれのMAX値を取得
             if( (float)data.getPM25() > mMax[0] ){ mMax[0] = (float)data.getPM25(); mMaxTime[0] = nCount; }
             if( data.getOX() > mMax[1] ){ mMax[1] = data.getOX(); mMaxTime[1] = nCount; }
             if( data.getWS() > mMax[2] ){ mMax[2] = data.getWS(); mMaxTime[2] = nCount; }
             // 24時間平均値計算
+            // データの連続性は保証されないので、カウントでの判定はだめ。
             if( nCount++ < 24){
                 mAve[0] += (float)data.getPM25();
                 mAve[1] += data.getOX();
                 mAve[2] += data.getWS();
             }
+
+            // 時間での判定
+            while(data.getDate().compareTo(curtime) < 0) {
+                mSoramame.setData(String.valueOf(curtime.get(Calendar.YEAR)), String.valueOf(curtime.get(Calendar.MONTH)),
+                        String.valueOf(curtime.get(Calendar.DAY_OF_MONTH)), String.valueOf(curtime.get(Calendar.HOUR_OF_DAY)),
+                        "0.0", "0", "0", "0");
+                curtime.setTimeInMillis(curtime.getTimeInMillis() - 1000*60*60);
+            }
             mSoramame.setData(data);
+            curtime.setTimeInMillis(curtime.getTimeInMillis() - 1000*60*60);
         }
         mAve[0] /= 24.0f;
         mAve[1] /=24.0f;
@@ -202,6 +218,10 @@ public class SoraGraphView extends View {
 
     public int getPos(){
         return mIndex;
+    }
+
+    public Soramame.SoramameData getPosData(){
+        return mSoramame.getSoramameData(mIndex);
     }
 
     // 表示データ設定
@@ -400,6 +420,7 @@ public class SoraGraphView extends View {
         // グラフ
         if(mSoramame.getSize() > 0){
             ArrayList<Soramame.SoramameData> list = mSoramame.getData();
+
             float x=paddingLeft+contentWidth;
             // ここで、時間（データ数）での分割
             // listには新しいデータから入っている
@@ -475,17 +496,6 @@ public class SoraGraphView extends View {
                     canvas.drawText(String.format("%d日", data.getDate().get(Calendar.DAY_OF_MONTH)),
                             x, paddingTop + contentHeight + mTextHeight, mTextPaint);
                 }
-                // リストにてクリックしたインデックスデータに描画<-ここを画像に切替える
-//                if( nCount == mIndex){
-//                    mVert[0]=x;
-//                    mVert[1] = doty;
-//                    mVert[2]=x+gap*2;
-//                    mVert[3]=doty-30;
-//                    mVert[4]=x-gap*2;
-//                    mVert[5]=mVert[3];
-//
-//                    canvas.drawVertices(Canvas.VertexMode.TRIANGLES, 6, mVert, 0, null, 0,null,0,null,0,0, mDot);
-//                }
                 nCount += 1;
                 x -= gap;
                 // グラフ用ポリライン描画

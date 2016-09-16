@@ -125,8 +125,7 @@ public class GraphViewAdapter extends RecyclerView.Adapter<GraphViewAdapter.View
 
     // 指定位置の日時、計測値を設定
     public void TouchEvent(final ViewHolder holder, final int position ){
-        ArrayList<Soramame.SoramameData> list = mList.get(position).getData();
-        Soramame.SoramameData val = list.get(holder.soragraph.getPos());
+        Soramame.SoramameData val = holder.soragraph.getPosData();
         holder.date.setText(val.getDateString());
         holder.hour.setText(val.getHourString());
         switch(mMode){
