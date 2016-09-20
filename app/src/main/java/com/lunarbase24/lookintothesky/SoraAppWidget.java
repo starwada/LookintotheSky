@@ -254,8 +254,8 @@ public class SoraAppWidget extends AppWidgetProvider {
             mSettings.m_fRadius = (float)sharedPref.getInt("seekbar_dotradius", 8);
 
             // debug start
-            Toast toast = Toast.makeText(context, String.format("%s", intent.getAction()), Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP|Gravity.START, 0, 0);
+            Toast toast = Toast.makeText(context, String.format("%s", context.getPackageName()), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
             // debug end
 
@@ -311,7 +311,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                 // ここでAsyncTaskを使う理由はWebアクセスのため。
                 // ウィジットで使っている測定局を取得、その分ループして、測定局の計測データを取得する。
                 int[] nMstCodes = SoramameAccessor.getWidgetMst(this);
-                if(nMstCodes == null){ return 0; }
+                if(nMstCodes == null){ return START_NOT_STICKY; }
                 for (int nCode: nMstCodes) {
                     new SoraDesc().execute(nCode);
                 }
@@ -380,7 +380,7 @@ public class SoraAppWidget extends AppWidgetProvider {
                     // 同じ測定局は一度に処理をする
                     int[] appWidgetIds = SoramameAccessor.getWidgetIDByMst(MyService.this, soramame.getMstCode());
                     for (int i = 0; i < appWidgetIds.length; i++) {
-                        AppSettings settings = (AppSettings) MyService.this.getApplication();
+//                        AppSettings settings = (AppSettings) MyService.this.getApplication();
                         Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetIds[i], appWidgetIds[i + 1], mSettings);
                         // ここでウィジット更新
                         AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
