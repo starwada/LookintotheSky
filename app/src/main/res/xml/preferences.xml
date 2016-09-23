@@ -43,4 +43,15 @@
             lookintothesky:maxValue="15"
             />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:key="notify_settings"
+        android:title="@string/configure_notify"
+        >
+        <CheckBoxPreference
+            android:key="notify"
+            android:title="@string/notify"
+            android:summary="@string/settings_summary_notify"
+            android:defaultValue="false"
+            />
+    </PreferenceCategory>
 </PreferenceScreen>

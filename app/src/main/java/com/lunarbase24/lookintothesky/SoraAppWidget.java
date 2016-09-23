@@ -185,6 +185,8 @@ public class SoraAppWidget extends AppWidgetProvider {
         strShared = String.format(Locale.JAPANESE, "%s %s\n%s %s #空見てごらん",
                 soramame.getMstName(), (type == 0 ? "PM2.5" : "   OX"), soramame.getData().get(0).getCalendarString(), widgetText);
 
+        // 異常データ通知
+
         // 計測値にスタイルを適用したいため、以下を使用。
         // "未計測"をイタリックにすると、wrap_contentにて端が表示されないので、スタイルを変更する。
         // 計測値はイタリックが見栄えがいいので。

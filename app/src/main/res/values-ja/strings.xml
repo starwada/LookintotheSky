@@ -31,4 +31,7 @@
     <string name="settings_summary_transparency">グラフ背景の透過率</string>
     <string name="settings_summary_dotradius">ドット半径</string>
     <string name="unit_minutes">分</string>
+    <string name="configure_notify">通知設定</string>
+    <string name="settings_summary_notify">通知を有効にします</string>
+    <string name="notify">通知</string>
 </resources>

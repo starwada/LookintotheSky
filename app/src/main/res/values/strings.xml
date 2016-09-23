@@ -38,4 +38,7 @@
     <string name="settings_summary_dotradius">dot radius</string>
     <string name="unit_minutes">minutes</string>
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="configure_notify">Notifications Settings</string>
+    <string name="settings_summary_notify">Notifications</string>
+    <string name="notify">Notifications</string>
 </resources>
