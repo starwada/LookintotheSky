@@ -1,33 +1,30 @@
 package com.lunarbase24.lookintothesky;
 
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-
 /**
  * Created by Wada on 2016/07/29.
  * アプリ用設定データ
  * ウィジット用
  */
-public class AppSettings extends Application{
+public class AppSettings {
     int m_nDataType;        // データ種別 0 PM2.5/1 OX
     int m_nDispHour;        // 表示時間 6～12時間
     int m_nUpdateTime;  // 更新時間 分
     int m_nTransp;        // グラフ背景透過率 0～255
     float m_fRadius;        // グラフ丸の半径
 
+    Boolean m_bNotify;      // 通知フラグ
+
     AppSettings(){
         onCreate();
     }
 
-    @Override
     public void onCreate() {
-        super.onCreate();
         m_nDataType = 0;
         m_nDispHour = 12;
         m_nUpdateTime = 15;
         m_nTransp = 128;
         m_fRadius = 6.0f;
+        m_bNotify = false;
     }
 
     // 各データのスピナー用インデックス

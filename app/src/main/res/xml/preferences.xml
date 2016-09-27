@@ -53,5 +53,14 @@
             android:summary="@string/settings_summary_notify"
             android:defaultValue="false"
             />
+        <com.lunarbase24.lookintothesky.ColorListPreference
+            android:key="colorlist_notify"
+            android:title="@string/notify_value"
+            android:summary="@string/settings_summary_notifyvalue"
+            android:dialogTitle="@string/notify_value"
+            android:entries="@array/notify"
+            android:entryValues="@array/notify_value"
+            android:widgetLayout="@layout/color_sample"
+            />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -247,6 +247,12 @@ public class SoraAppWidget extends AppWidgetProvider {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
 
+            ComponentName thisWidget = new ComponentName(context, SoraAppWidget.class);
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            int appWidgetIds[] = manager.getAppWidgetIds(thisWidget);
+            if(appWidgetIds == null || appWidgetIds.length < 1){
+                return;
+            }
             // 設定データ取得
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
             if(mSettings == null){ mSettings = new AppSettings(); }
@@ -254,9 +260,10 @@ public class SoraAppWidget extends AppWidgetProvider {
             mSettings.m_nUpdateTime = Integer.parseInt(sharedPref.getString("updatetime", "15"));
             mSettings.m_nTransp = sharedPref.getInt("seekbar_transparency", 125);
             mSettings.m_fRadius = (float)sharedPref.getInt("seekbar_dotradius", 8);
+            mSettings.m_bNotify = sharedPref.getBoolean("notify", false);
 
             // debug start
-            Toast toast = Toast.makeText(context, String.format("%s", context.getPackageName()), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(context, String.format("%s", context.getApplicationInfo().name), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
             // debug end
@@ -382,7 +389,6 @@ public class SoraAppWidget extends AppWidgetProvider {
                     // 同じ測定局は一度に処理をする
                     int[] appWidgetIds = SoramameAccessor.getWidgetIDByMst(MyService.this, soramame.getMstCode());
                     for (int i = 0; i < appWidgetIds.length; i++) {
-//                        AppSettings settings = (AppSettings) MyService.this.getApplication();
                         Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetIds[i], appWidgetIds[i + 1], mSettings);
                         // ここでウィジット更新
                         AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);

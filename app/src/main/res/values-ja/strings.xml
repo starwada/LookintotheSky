@@ -34,4 +34,6 @@
     <string name="configure_notify">通知設定</string>
     <string name="settings_summary_notify">通知を有効にします</string>
     <string name="notify">通知</string>
+    <string name="notify_value">通知設定</string>
+    <string name="settings_summary_notifyvalue">通知する値を設定します</string>
 </resources>

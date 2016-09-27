@@ -46,4 +46,20 @@
         <item>50</item>
         <item>55</item>
     </string-array>
+    <string-array name="notify">
+        <item>0～10</item>
+        <item>11～15</item>
+        <item>16～35</item>
+        <item>36～50</item>
+        <item>51～70</item>
+        <item>71～100</item>
+    </string-array>
+    <string-array name="notify_value">
+        <item>0xff0000ff</item>
+        <item>0xff0000ff</item>
+        <item>0xff0000ff</item>
+        <item>0xff0000ff</item>
+        <item>0xff0000ff</item>
+        <item>0xffff0000</item>
+    </string-array>
 </resources>

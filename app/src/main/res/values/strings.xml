@@ -41,4 +41,6 @@
     <string name="configure_notify">Notifications Settings</string>
     <string name="settings_summary_notify">Notifications</string>
     <string name="notify">Notifications</string>
+    <string name="notify_value">Notify Value</string>
+    <string name="settings_summary_notifyvalue">notify value</string>
 </resources>
