@@ -21,8 +21,8 @@
 
         <com.lunarbase24.lookintothesky.ColorView
             android:id="@+id/colorlist_color"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             />
         <TextView
             android:id="@+id/colorlist_text"

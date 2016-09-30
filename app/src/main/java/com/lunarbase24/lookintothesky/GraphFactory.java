@@ -1,5 +1,6 @@
 package com.lunarbase24.lookintothesky;
 
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -81,6 +82,9 @@ public class GraphFactory {
         mTextPaint = new TextPaint();
         mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setTextAlign(Paint.Align.LEFT);
+
+        // 色はリソースから
+
         // PM2.5/OX/WS
         // ～１０/0.0-0.02/0.2-3.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][0], (float)(paddingLeft+contentWidth), y);

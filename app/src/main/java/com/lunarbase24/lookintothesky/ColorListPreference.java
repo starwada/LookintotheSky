@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.support.annotation.NonNull;
@@ -73,7 +74,7 @@ public class ColorListPreference extends ListPreference {
 
         @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             CharSequence colorId = this.getItem(position);
 
             // 行を作る
@@ -84,6 +85,10 @@ public class ColorListPreference extends ListPreference {
             row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    SharedPreferences.Editor editor = getSharedPreferences().edit();
+                    editor.putInt( getKey(), position );
+                    editor.commit();
+
                     getDialog().dismiss();
                 }
             });
@@ -95,7 +100,7 @@ public class ColorListPreference extends ListPreference {
             // タイトルを設定する
             TextView tv = (TextView)row.findViewById(R.id.colorlist_text);
             tv.setText(mEntries[position]);
-            tv.setTextColor(color);
+            tv.setTextColor(Color.BLACK);
 
             // チェックボックスのセット
             RadioButton rb = (RadioButton)row.findViewById(R.id.colorlist_check);
@@ -133,7 +138,7 @@ public class ColorListPreference extends ListPreference {
                 R.layout.settings_colorlistpreference_layout, this.getEntryValues(), nColorIndex, this.getEntries());
 
         // リストアダプターをセットする
-        builder.setAdapter(la, this);
+        builder.setAdapter(la, null);
 
         return;
     }
@@ -149,7 +154,7 @@ public class ColorListPreference extends ListPreference {
         }
 
         // カラーサンプルの色を設定する
-        View v = view.findViewById(R.id.color_sample);
-        v.setBackgroundColor(getColor(values[nColorIndex].toString()));
+        ColorView v = (ColorView)view.findViewById(R.id.color_sample);
+        v.setColor(getColor(values[nColorIndex].toString()));
     }
 }

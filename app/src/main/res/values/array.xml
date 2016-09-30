@@ -56,10 +56,18 @@
     </string-array>
     <string-array name="notify_value">
         <item>0xff0000ff</item>
-        <item>0xff0000ff</item>
-        <item>0xff0000ff</item>
-        <item>0xff0000ff</item>
-        <item>0xff0000ff</item>
+        <item>0xff00ffff</item>
+        <item>0xff00ff00</item>
+        <item>0xffffff00</item>
+        <item>0xff8000</item>
         <item>0xffff0000</item>
     </string-array>
+    <array name="graph_color_rgb">
+        <item>#0000ff</item>
+        <item>#00ffff</item>
+        <item>#00ff00</item>
+        <item>#ffff00</item>
+        <item>#ff8000</item>
+        <item>#ff0000</item>
+    </array>
 </resources>

@@ -60,7 +60,6 @@
             android:dialogTitle="@string/notify_value"
             android:entries="@array/notify"
             android:entryValues="@array/notify_value"
-            android:widgetLayout="@layout/color_sample"
-            />
+            android:widgetLayout="@layout/color_sample"/>
     </PreferenceCategory>
 </PreferenceScreen>

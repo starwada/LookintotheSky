@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<View xmlns:android="http://schemas.android.com/apk/res/android"
+<com.lunarbase24.lookintothesky.ColorView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/color_sample"
-    android:layout_width="50dp"
-    android:layout_height="50dp"
-    android:background="#ff00ff00">
+    android:layout_width="40dp"
+    android:layout_height="40dp">
 
-</View>
+</com.lunarbase24.lookintothesky.ColorView>

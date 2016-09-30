@@ -53,10 +53,9 @@ public class SoraGraphView extends View {
     private Path mHourPath;
     private float mHourTextWidth[] = new float[4];
     private RectF mRect;
-//    private float[] mVert;
+    private int[] mGraphBackColor;      // グラフ背景色
 
     private Paint mOX;
-//    private float[] mOXLines;
     // 表示区分 PM2.5 OX（光化学オキシダント） WS（風速）
     private float mDotY[][] = { {10.0f, 15.0f, 35.0f, 50.0f, 70.0f, 100.0f },
         {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
@@ -144,6 +143,9 @@ public class SoraGraphView extends View {
             mHourPath = new Path();
             mHourTextWidth[0] = mHourTextWidth[1] = 0.0f;
             mHourTextWidth[2] = mHourTextWidth[3] = 0.0f;
+
+            // リソース（array）から色設定を取得
+            mGraphBackColor = getResources().getIntArray(R.array.graph_color_rgb);
         }
         catch(java.lang.NullPointerException e){
             e.getMessage();
@@ -368,31 +370,37 @@ public class SoraGraphView extends View {
         float rh = (float)contentHeight/mDotY[mMode][5];
 
         // PM2.5/OX/WS
+        int alpha = 255;
         // ～１０/0.0-0.02/0.2-3.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][0], (float)(paddingLeft+contentWidth), y);
 //        mBack.setColor(Color.argb(75, 0, 0, 255));
-        mBack.setColor(0xFF2196F3);
+        mBack.setColor(mGraphBackColor[0]);
+        mBack.setAlpha(alpha);
         canvas.drawRect(mRect, mBack);
         // １１～１５/0.021-0.04/4.0-6.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][1], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][0]);
 //        mBack.setColor(Color.argb(75, 0, 255,255));
-        mBack.setColor(0xFF81D4FA);
+        mBack.setColor(mGraphBackColor[1]);
         canvas.drawRect(mRect, mBack);
         // １６～３５/0.041-0.06/7.0-9.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][2], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][1]);
-        mBack.setColor(Color.argb(75, 0, 255,128));
+//        mBack.setColor(Color.argb(75, 0, 255,128));
+        mBack.setColor(mGraphBackColor[2]);
         canvas.drawRect(mRect, mBack);
         // ３６～５０/0.061-0.119/10.0-12.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][3], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][2]);
-        mBack.setColor(Color.argb(75, 255, 255,0));
+//        mBack.setColor(Color.argb(75, 255, 255,0));
+        mBack.setColor(mGraphBackColor[3]);
         canvas.drawRect(mRect, mBack);
         // ５１～７０/0.12-0.239/13.0-14.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][4], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][3]);
-        mBack.setColor(Color.argb(75, 255, 128,0));
+//        mBack.setColor(Color.argb(75, 255, 128,0));
+        mBack.setColor(mGraphBackColor[4]);
         canvas.drawRect(mRect, mBack);
         // 70-100/0.24-0.34/15.0-25.0
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][5], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][4]);
-        mBack.setColor(Color.argb(75, 255, 0,0));
+//        mBack.setColor(Color.argb(75, 255, 0,0));
+        mBack.setColor(mGraphBackColor[5]);
         canvas.drawRect(mRect, mBack);
 
         // グラフ枠
