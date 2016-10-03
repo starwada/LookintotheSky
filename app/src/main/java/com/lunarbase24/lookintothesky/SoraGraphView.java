@@ -66,6 +66,7 @@ public class SoraGraphView extends View {
     private int mToastPos[] = { 0,0 };
     private int mMode;                      // 表示データモード 0 PM2.5/1 OX/2 風速
     private int mDispDay;               // 表示日数 0 全て
+    private int mTransparency;
 
     public SoraGraphView(Context context) {
         super(context);
@@ -243,6 +244,10 @@ public class SoraGraphView extends View {
         invalidate();
     }
 
+    public void setTransparency(int value){
+        mTransparency = value;
+    }
+
     // 最大値
     public String getMaxString(){
         ArrayList<Soramame.SoramameData> list = mSoramame.getData();
@@ -370,37 +375,41 @@ public class SoraGraphView extends View {
         float rh = (float)contentHeight/mDotY[mMode][5];
 
         // PM2.5/OX/WS
-        int alpha = 255;
         // ～１０/0.0-0.02/0.2-3.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][0], (float)(paddingLeft+contentWidth), y);
 //        mBack.setColor(Color.argb(75, 0, 0, 255));
         mBack.setColor(mGraphBackColor[0]);
-        mBack.setAlpha(alpha);
+        mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // １１～１５/0.021-0.04/4.0-6.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][1], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][0]);
 //        mBack.setColor(Color.argb(75, 0, 255,255));
         mBack.setColor(mGraphBackColor[1]);
+        mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // １６～３５/0.041-0.06/7.0-9.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][2], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][1]);
 //        mBack.setColor(Color.argb(75, 0, 255,128));
         mBack.setColor(mGraphBackColor[2]);
+        mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // ３６～５０/0.061-0.119/10.0-12.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][3], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][2]);
 //        mBack.setColor(Color.argb(75, 255, 255,0));
         mBack.setColor(mGraphBackColor[3]);
+        mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // ５１～７０/0.12-0.239/13.0-14.9
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][4], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][3]);
 //        mBack.setColor(Color.argb(75, 255, 128,0));
         mBack.setColor(mGraphBackColor[4]);
+        mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // 70-100/0.24-0.34/15.0-25.0
         mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][5], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][4]);
 //        mBack.setColor(Color.argb(75, 255, 0,0));
         mBack.setColor(mGraphBackColor[5]);
+        mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
 
         // グラフ枠

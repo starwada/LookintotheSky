@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     int mCurrentType = 0;       // 表示データ種別スピナー
     int mCurrentDay = 3;        // 表示日数スピナー 値は表示日数、１から７、０は最大と判断。
+    int mGraphTransparency = 0;   //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +187,9 @@ public class MainActivity extends AppCompatActivity {
         getSelectedStation();
         // 表示測定局をDBに保持
         updateDBIndex();
+        // グラフ背景透過率取得
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mGraphTransparency = sharedPref.getInt("graph_transparency", 100);
 
         // 表示する測定局がたくさんあるとここで時間がかかる
         if (mList != null) {
@@ -622,7 +626,8 @@ public class MainActivity extends AppCompatActivity {
                 if (mAdapter != null) {
                     mAdapter = null;
                 }
-                mAdapter = new GraphViewAdapter(MainActivity.this, mList, mCurrentType, mCurrentDay == 0 ? 7 : mCurrentDay - 1);
+                mAdapter = new GraphViewAdapter(MainActivity.this, mList, mCurrentType,
+                        mCurrentDay == 0 ? 7 : mCurrentDay - 1, mGraphTransparency);
 
                 mLayoutManager = new LinearLayoutManager(MainActivity.this);
                 mRecyclerView.setLayoutManager(mLayoutManager);

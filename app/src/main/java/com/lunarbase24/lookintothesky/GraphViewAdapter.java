@@ -22,6 +22,7 @@ public class GraphViewAdapter extends RecyclerView.Adapter<GraphViewAdapter.View
     private List<Soramame> mList;
     private int mMode;      // データ表示モード　0 PM2.5/1 光化学オキシダント/2 風速
     private int mDay;
+    private int mGraph;     // グラフ背景の透過度
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         public TextView stationname;
@@ -44,11 +45,12 @@ public class GraphViewAdapter extends RecyclerView.Adapter<GraphViewAdapter.View
         }
     }
 
-    public GraphViewAdapter(Context context, List<Soramame> objects, int mode, int day){
+    public GraphViewAdapter(Context context, List<Soramame> objects, int mode, int day, int graph){
         this.mContext = context;
         this.mList = objects;
         this.mMode = mode;
         this.mDay = day;
+        this.mGraph = graph;
     }
 
     public void SetMode(int mode){ mMode = mode; }
@@ -68,6 +70,7 @@ public class GraphViewAdapter extends RecyclerView.Adapter<GraphViewAdapter.View
         holder.soragraph.setData(data);
         holder.soragraph.setMode(mMode);
         holder.soragraph.setDispDay(mDay);
+        holder.soragraph.setTransparency(mGraph);
         holder.soramax.setText(holder.soragraph.getMaxString());
         holder.soraave.setText(holder.soragraph.getAveString());
         holder.stationname.setText(data.getMstName());

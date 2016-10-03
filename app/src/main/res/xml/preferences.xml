@@ -3,6 +3,22 @@
     xmlns:lookintothesky="http://schemas.android.com/apk/res/com.lunarbase24.lookintothesky">
 
     <PreferenceCategory
+        android:key="graph_settings"
+        android:title="@string/configure_graph"
+        >
+        <com.lunarbase24.lookintothesky.SeekBarPreference
+            android:key="graph_transparency"
+            android:title="@string/graph_back"
+            android:summary="@string/settings_summary_transparency"
+            android:persistent="true"
+            android:defaultValue="100"
+            lookintothesky:minValue="0"
+            lookintothesky:maxValue="255"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:key="widget_settings"
         android:title="@string/configure"
         >
@@ -53,6 +69,7 @@
             android:summary="@string/settings_summary_notify"
             android:defaultValue="false"
             />
+        <!--
         <com.lunarbase24.lookintothesky.ColorListPreference
             android:key="colorlist_notify"
             android:title="@string/notify_value"
@@ -61,5 +78,6 @@
             android:entries="@array/notify"
             android:entryValues="@array/notify_value"
             android:widgetLayout="@layout/color_sample"/>
+            -->
     </PreferenceCategory>
 </PreferenceScreen>

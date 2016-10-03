@@ -43,4 +43,5 @@
     <string name="notify">Notifications</string>
     <string name="notify_value">Notify Value</string>
     <string name="settings_summary_notifyvalue">notify value</string>
+    <string name="configure_graph">Graph Settings</string>
 </resources>
