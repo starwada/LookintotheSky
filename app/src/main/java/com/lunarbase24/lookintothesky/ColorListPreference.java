@@ -20,48 +20,19 @@ import android.widget.TextView;
 
 /**
  * Created by Wada on 2016/09/27.
+ * EntryValuesには色配列のインデックスを文字列にて設定している。
+ * EntryValuesは文字列となっている。
+ * Preferenceにはそのインデックスを文字列にて保持。
+ * ここを、intで設定して、エラーが起き、原因を特定するのに時間がかかった。
+ * 色配列は別のarrayにて定義している（他でも利用できるように）。
+ *
  */
 
 public class ColorListPreference extends ListPreference {
     private int[] mGraphBackColor;      // グラフ背景色
-    private int mIndex;
 
     public int getColor(String color){
-
         return mGraphBackColor[Integer.parseInt(color)];
-//        int retColor = 0;
-//
-//        String tmp = color.toLowerCase();
-//        if(tmp.charAt(0) == '0' && tmp.charAt(1) == 'x'){
-//            tmp = tmp.substring(2);
-//        }
-//
-//        // aarrggbb
-//        if(tmp.length() == 8){
-//            retColor = StrToHex(tmp.substring(0, 2)) << 24
-//                    | StrToHex(tmp.substring(2, 4)) << 16
-//                    | StrToHex(tmp.substring(4, 6)) << 8
-//                    | StrToHex(tmp.substring(6, 8));
-//            // rrggbb
-//        }else if(tmp.length() == 6){
-//            retColor = 0xff000000
-//                    | StrToHex(tmp.substring(0, 2)) << 16
-//                    | StrToHex(tmp.substring(2, 4)) << 8
-//                    | StrToHex(tmp.substring(4, 6));
-//        }
-//        return retColor;
-    }
-
-    public int StrToHex(String str){
-        int Hex = 0;
-
-        try{
-            Hex = Integer.parseInt(str,16);
-        }catch (Exception e){
-            e.printStackTrace();
-            Hex = 0;
-        }
-        return Hex;
     }
 
     public class ColorListAdapter extends ArrayAdapter<CharSequence> {
@@ -79,7 +50,7 @@ public class ColorListPreference extends ListPreference {
         @NonNull
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            CharSequence colorId = this.getItem(position);
+            final CharSequence colorId = this.getItem(position);
 
             // 行を作る
             LayoutInflater inflater = ((Activity)this.getContext()).getLayoutInflater();
@@ -89,10 +60,9 @@ public class ColorListPreference extends ListPreference {
             row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    SharedPreferences.Editor editor = getSharedPreferences().edit();
-//                    editor.putInt( getKey(), position );
-//                    editor.apply();
-                    mIndex = position;
+                    SharedPreferences.Editor editor = getSharedPreferences().edit();
+                    editor.putString( getKey(), colorId.toString() );
+                    editor.apply();
 
                     getDialog().dismiss();
                 }
@@ -127,14 +97,14 @@ public class ColorListPreference extends ListPreference {
     public ColorListPreference(Context context, AttributeSet attrs){
         super(context, attrs);
         mGraphBackColor = context.getResources().getIntArray(R.array.graph_color_rgb);
-        mIndex = 0;
     }
 
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder){
 
         // Preferenceにはインデックスを保持しておく
-        int nColorIndex = this.getSharedPreferences().getInt(this.getKey(), 0);
+        String sColorIndex = this.getSharedPreferences().getString(this.getKey(), "0");
+        int nColorIndex = Integer.parseInt(sColorIndex);
         CharSequence[] values =  this.getEntryValues();
         if(nColorIndex < 0 || values.length <= nColorIndex){
             nColorIndex = 0;
@@ -150,12 +120,6 @@ public class ColorListPreference extends ListPreference {
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
-        if(!positiveResult) {
-            SharedPreferences.Editor editor = getSharedPreferences().edit();
-            String key = this.getKey();
-            editor.putInt(key, mIndex);
-            editor.apply();
-        }
         super.onDialogClosed(positiveResult);
     }
 
@@ -163,7 +127,8 @@ public class ColorListPreference extends ListPreference {
     protected void onBindView(View view) {
         super.onBindView(view);
         // プリファレンスから色を取り出す
-        int nColorIndex = this.getSharedPreferences().getInt(this.getKey(), 0);
+        String sColorIndex = this.getSharedPreferences().getString(this.getKey(), "0");
+        int nColorIndex = Integer.parseInt(sColorIndex);
         CharSequence[] values =  this.getEntryValues();
         if(nColorIndex < 0 || values.length <= nColorIndex){
             nColorIndex = 0;
