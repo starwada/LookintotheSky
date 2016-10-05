@@ -1,5 +1,9 @@
 package com.lunarbase24.lookintothesky;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 /**
  * Created by Wada on 2016/07/29.
  * アプリ用設定データ
@@ -13,6 +17,8 @@ public class AppSettings {
     float m_fRadius;        // グラフ丸の半径
 
     Boolean m_bNotify;      // 通知フラグ
+    int m_nNotifyValue;     // 通知設定値
+    int m_nNotifyTimezone;  // 通知時間帯
 
     AppSettings(){
         onCreate();
@@ -25,6 +31,20 @@ public class AppSettings {
         m_nTransp = 128;
         m_fRadius = 6.0f;
         m_bNotify = false;
+        m_nNotifyValue = 3;
+        m_nNotifyTimezone = 6;
+    }
+
+    // 設定値を取得
+    public void getPreference(Context context){
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        m_nDispHour = Integer.parseInt(sharedPref.getString("disphour_preference", "11"));
+        m_nUpdateTime = Integer.parseInt(sharedPref.getString("updatetime", "15"));
+        m_nTransp = sharedPref.getInt("seekbar_transparency", 125);
+        m_fRadius = (float)sharedPref.getInt("seekbar_dotradius", 8);
+        m_bNotify = sharedPref.getBoolean("notify", false);
+        m_nNotifyValue = Integer.parseInt(sharedPref.getString("colorlist_notify", "3"));
+        m_nNotifyTimezone = Integer.parseInt(sharedPref.getString("timezonelist_notify", "6"));
     }
 
     // 各データのスピナー用インデックス

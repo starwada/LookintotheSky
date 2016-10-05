@@ -247,6 +247,7 @@ public class SoraAppWidget extends AppWidgetProvider {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
 
+            // ウィジェットを配置していなければ未処理で終わる
             ComponentName thisWidget = new ComponentName(context, SoraAppWidget.class);
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
             int appWidgetIds[] = manager.getAppWidgetIds(thisWidget);
@@ -254,13 +255,8 @@ public class SoraAppWidget extends AppWidgetProvider {
                 return;
             }
             // 設定データ取得
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
             if(mSettings == null){ mSettings = new AppSettings(); }
-            mSettings.m_nDispHour = Integer.parseInt(sharedPref.getString("disphour_preference", "11"));
-            mSettings.m_nUpdateTime = Integer.parseInt(sharedPref.getString("updatetime", "15"));
-            mSettings.m_nTransp = sharedPref.getInt("seekbar_transparency", 125);
-            mSettings.m_fRadius = (float)sharedPref.getInt("seekbar_dotradius", 8);
-            mSettings.m_bNotify = sharedPref.getBoolean("notify", false);
+            mSettings.getPreference(context);
 
             // debug start
             Toast toast = Toast.makeText(context, String.format("%s", context.getApplicationInfo().name), Toast.LENGTH_SHORT);
