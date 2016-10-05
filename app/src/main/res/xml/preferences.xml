@@ -77,7 +77,17 @@
             android:dialogTitle="@string/notify_value"
             android:entries="@array/notify"
             android:entryValues="@array/notify_value"
+            android:defaultValue="3"
             android:widgetLayout="@layout/color_sample"/>
 
+        <com.lunarbase24.lookintothesky.TimezoneListPreference
+            android:key="timezonelist_notify"
+            android:title="@string/notify_timezone"
+            android:summary="@string/settings_summary_notify_timezone"
+            android:dialogTitle="@string/notify_timezone"
+            android:entries="@array/timezone"
+            android:entryValues="@array/timezone_value"
+            android:defaultValue="6"
+            />
     </PreferenceCategory>
 </PreferenceScreen>

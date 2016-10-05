@@ -44,4 +44,6 @@
     <string name="notify_value">Notify Value</string>
     <string name="settings_summary_notifyvalue">notify value</string>
     <string name="configure_graph">Graph Settings</string>
+    <string name="notify_timezone">Notify Time zone</string>
+    <string name="settings_summary_notify_timezone">set notify time zone</string>
 </resources>

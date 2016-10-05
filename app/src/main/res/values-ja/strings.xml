@@ -37,4 +37,6 @@
     <string name="notify_value">通知設定</string>
     <string name="settings_summary_notifyvalue">通知する値を設定します</string>
     <string name="configure_graph">グラフ設定</string>
+    <string name="notify_timezone">通知時間帯</string>
+    <string name="settings_summary_notify_timezone">通知時間帯を設定します</string>
 </resources>

@@ -14,11 +14,17 @@ import android.preference.PreferenceManager;
 
 /*
     設定（セッティング）アクティビティ
+    グラフの設定
+    グラフ背景透過率：
     ウィジットの設定
     データ種別：PM2.5/OX
     表示時間：6～12時間
     更新時間：何分か（毎時）
     グラフ関連：背景の透過率？グラフ丸の半径
+    通知の設定
+    通知有無：
+    通知設定値：
+    通知時間帯：
  */
 public class SettingActivity extends PreferenceActivity {
     private static final String ACTION_CHANGE_SETTING = "com.lunarbase24.lookintothesky.ACTION_CHANGE_SETTING";
@@ -50,7 +56,8 @@ public class SettingActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.preferences);
             setSummary("disphour_preference");
             setSummary("updatetime");
-            updateView("colorlist_notify");
+            setSummary("colorlist_notify");
+            setSummary("timezonelist_notify");
         }
 
         private SharedPreferences.OnSharedPreferenceChangeListener listener =
@@ -58,7 +65,6 @@ public class SettingActivity extends PreferenceActivity {
                     @Override
                     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
                         setSummary(s);
-                        updateView(s);
                     }
                 };
 //        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
@@ -75,15 +81,16 @@ public class SettingActivity extends PreferenceActivity {
                 pref.setSummary(String.format("%s:%s %s",
                         getString(R.string.settings_summary_updatetime), ((ListPreference)pref).getValue(), getString(R.string.unit_minutes)));
             }
-        }
-
-        // View更新
-        // これを実行すると、ColorListPreferenceに設定している色表示ビューまで更新される。
-        private void updateView(String key) {
-            if (key.equals("colorlist_notify")) {
+            // これを実行すると、ColorListPreferenceに設定している色表示ビューまで更新される。
+            else if (key.equals("colorlist_notify")) {
                 Preference pref = findPreference(key);
                 pref.setSummary(String.format("%s\n%s",
                         getString(R.string.settings_summary_notifyvalue), ((ColorListPreference)pref).getValue()));
+            }
+            else if(key.equals("timezonelist_notify")){
+                Preference pref = findPreference(key);
+                pref.setSummary(String.format("%s\n%s",
+                        getString(R.string.settings_summary_notify_timezone), ((TimezoneListPreference)pref).getValue()));
             }
         }
 

@@ -37,4 +37,6 @@
     <string name="notify_value">Notify Value</string>
     <string name="settings_summary_notifyvalue">Notify Value</string>
     <string name="configure_graph">Graph Settings</string>
+    <string name="notify_timezone">Notify Time Zone</string>
+    <string name="settings_summary_notify_timezone">Set Notify Time zone</string>
 </resources>
