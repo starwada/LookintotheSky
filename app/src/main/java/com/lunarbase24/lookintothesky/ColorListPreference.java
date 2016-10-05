@@ -3,11 +3,9 @@ package com.lunarbase24.lookintothesky;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.ListPreference;
-import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -49,7 +47,7 @@ public class ColorListPreference extends ListPreference {
 
         @NonNull
         @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent) {
             final CharSequence colorId = this.getItem(position);
 
             // 行を作る
@@ -68,10 +66,6 @@ public class ColorListPreference extends ListPreference {
                 }
             });
 
-            // 設定する色を取り出す
-            int color = getColor(colorId.toString());
-//            row.setId(color);
-
             // タイトルを設定する
             TextView tv = (TextView)row.findViewById(R.id.colorlist_text);
             tv.setText(mEntries[position]);
@@ -88,7 +82,7 @@ public class ColorListPreference extends ListPreference {
 
             // サンプル表示用ビューに色をセットする
             ColorView view = (ColorView)row.findViewById(R.id.colorlist_color);
-            view.setColor(color);
+            view.setColor(getColor(colorId.toString()));
 
             return row;
         }
@@ -126,6 +120,26 @@ public class ColorListPreference extends ListPreference {
     @Override
     protected void onBindView(View view) {
         super.onBindView(view);
+
+        // カラーサンプルの色を設定する
+        ColorView v = (ColorView)view.findViewById(R.id.color_sample);
+        v.setColor(getColor(getEntry().toString()));
+    }
+
+    @Override
+    public String getValue() {
+        // プリファレンスから色を取り出す
+        String sColorIndex = this.getSharedPreferences().getString(this.getKey(), "0");
+        int nColorIndex = Integer.parseInt(sColorIndex);
+        CharSequence[] values =  this.getEntries();
+        if(nColorIndex < 0 || values.length <= nColorIndex){
+            nColorIndex = 0;
+        }
+        return values[nColorIndex].toString();
+    }
+
+    @Override
+    public CharSequence getEntry() {
         // プリファレンスから色を取り出す
         String sColorIndex = this.getSharedPreferences().getString(this.getKey(), "0");
         int nColorIndex = Integer.parseInt(sColorIndex);
@@ -133,9 +147,6 @@ public class ColorListPreference extends ListPreference {
         if(nColorIndex < 0 || values.length <= nColorIndex){
             nColorIndex = 0;
         }
-
-        // カラーサンプルの色を設定する
-        ColorView v = (ColorView)view.findViewById(R.id.color_sample);
-        v.setColor(getColor(values[nColorIndex].toString()));
+        return values[nColorIndex];
     }
 }

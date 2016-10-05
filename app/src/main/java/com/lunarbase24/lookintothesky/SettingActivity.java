@@ -50,6 +50,7 @@ public class SettingActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.preferences);
             setSummary("disphour_preference");
             setSummary("updatetime");
+            updateView("colorlist_notify");
         }
 
         private SharedPreferences.OnSharedPreferenceChangeListener listener =
@@ -57,6 +58,7 @@ public class SettingActivity extends PreferenceActivity {
                     @Override
                     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
                         setSummary(s);
+                        updateView(s);
                     }
                 };
 //        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
@@ -72,6 +74,16 @@ public class SettingActivity extends PreferenceActivity {
                 Preference pref = findPreference(key);
                 pref.setSummary(String.format("%s:%s %s",
                         getString(R.string.settings_summary_updatetime), ((ListPreference)pref).getValue(), getString(R.string.unit_minutes)));
+            }
+        }
+
+        // View更新
+        // これを実行すると、ColorListPreferenceに設定している色表示ビューまで更新される。
+        private void updateView(String key) {
+            if (key.equals("colorlist_notify")) {
+                Preference pref = findPreference(key);
+                pref.setSummary(String.format("%s\n%s",
+                        getString(R.string.settings_summary_notifyvalue), ((ColorListPreference)pref).getValue()));
             }
         }
 
