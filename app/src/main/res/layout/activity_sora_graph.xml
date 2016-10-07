@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_sora_graph"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.lunarbase24.lookintothesky.SoraGraphActivity">
+    <TextView
+        android:text="@string/MonitorStation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:id="@+id/MstName"
+        />
+
+    <ImageView
+        android:id="@+id/card_snap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_card_snap"/>
+
+    <com.lunarbase24.lookintothesky.SoraGraphView
+        android:id="@+id/soragraph"
+        android:layout_below="@+id/MstName"
+        android:background="#ccc"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        app:exampleDimension="24sp"
+        app:exampleColor="#33b5e5"
+        app:exampleString="Hello, LunarBaseGraphView"
+        app:exampleDrawable="@android:drawable/ic_menu_add" />
+
+    <TextView
+        android:text="最大値"
+        android:id="@+id/soramax"
+        android:layout_below="@+id/soragraph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="false" />
+
+    <TextView
+        android:text="24時間平均値"
+        android:id="@+id/soraave"
+        android:layout_below="@+id/soramax"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/soragraph"
+        android:text="TextView"
+        android:textSize="18sp"
+        android:layout_toRightOf="@+id/soraave" />
+
+    <TextView
+        android:id="@+id/hour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/date"
+        android:layout_alignLeft="@+id/date"
+        android:text="Hour"
+        android:textSize="24sp"/>
+
+    <TextView
+        android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/soragraph"
+        android:layout_alignParentRight="true"
+        android:text="TextView"
+        android:textSize="6mm"
+        android:textColor="#3f51b5"/>
+
+    <ImageView
+        android:id="@+id/imageWS"
+        android:layout_width="32sp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/soragraph"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/ic_launcher_wd"/>
+
+</RelativeLayout>
