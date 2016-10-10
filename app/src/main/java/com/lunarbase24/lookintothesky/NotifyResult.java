@@ -1,5 +1,6 @@
 package com.lunarbase24.lookintothesky;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 /**
@@ -25,9 +26,26 @@ public class NotifyResult {
         return mWidgetID;
     }
 
-    public void reset(){
-        for(int i : mTimezone){
-            i = 0;
+    public boolean checktimezone(GregorianCalendar now){
+        boolean bOk = false;
+        int index = now.get(Calendar.HOUR_OF_DAY)/6;
+        if(index >= 0 && index < 4){
+            if(mTimezone[index] == 1){
+                bOk = true;
+                mTimezone[index] = 0;
+            }
+        }
+        return bOk;
+    }
+
+    public void reset(int timezone){
+        int mask = 1;
+        for(int i=0; i<4; i++) {
+            mask = 1 << i;
+            mTimezone[i] = 0;
+            if((timezone & mask) != 0){
+                mTimezone[i] = 1;
+            }
         }
     }
 

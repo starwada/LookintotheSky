@@ -24,7 +24,7 @@ public class NotifyGenerator {
     private ArrayList<NotifyResult> mNotifyList = null;
     // 以下は設定画面の値
     private boolean mNotifyFlag;        // 通知フラグ
-    private int mNotifyValueIndex;      // 通知しきい値
+    private int mNotifyValueIndex;      // 通知しきい値インデックス
     private int mTimezone;              // 通知時間帯
 
     public NotifyGenerator(){
@@ -76,6 +76,7 @@ public class NotifyGenerator {
         if(result == null){
             return;
         }
+        judge(result, soramame, type);
 
 
         NotificationManager NotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -100,11 +101,25 @@ public class NotifyGenerator {
     }
 
     // 通知判定
+    // result:通知結果情報
+    // data:計測データ
+    // type:データタイプ 0 PM2.5/1
     // 現在時間と通知時間帯とのカウント数をチェック
     // 閾値のチェック
-    private boolean judge(NotifyResult result){
+    private boolean judge(NotifyResult result, Soramame data, int type){
         boolean bOk = false;
+        // 通知時間帯チェック
         GregorianCalendar now = new GregorianCalendar(Locale.JAPAN);
+
+        bOk = result.checktimezone(now);
+        if(!bOk){
+            return bOk;
+        }
+
+        // 閾値チェック
+        if(mNotifyValueIndex <= data.getColorIndex(type, 0)){
+            bOk = true;
+        }
 
         return bOk;
     }

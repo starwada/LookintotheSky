@@ -436,8 +436,8 @@ public class Soramame implements Parcelable{
     // 指定データ種別の指定インデックスデータに該当する表示色を返す
     // nMode データ種別　0 OX/1 PM2.5/2 WS
     // nIndex データインデックス
-    public int getColor(int nMode, int nIndex){
-        int color = Color.BLACK;
+    public int getColorIndex(int nMode, int nIndex){
+        int color = 0;
         if(nMode < 0 || 2 < nMode){ return color; }
         SoramameData data = getSoramameData(nIndex);
         if(data == null){ return color; }
@@ -454,12 +454,12 @@ public class Soramame implements Parcelable{
                 fValue = data.getWS();
                 break;
         }
-        color = Color.BLUE;
-        if(mColor[nMode][0] < fValue && fValue <= mColor[nMode][1]){ color = Color.CYAN; }
-        else if(mColor[nMode][1] < fValue && fValue <= mColor[nMode][2]){ color = Color.GREEN; }
-        else if(mColor[nMode][2] < fValue && fValue <= mColor[nMode][3]){ color = Color.YELLOW; }
-        else if(mColor[nMode][3] < fValue && fValue <= mColor[nMode][4]){ color = Color.rgb(255,128,0); }
-        else if(mColor[nMode][4] < fValue){ color = Color.RED; }
+        color = 0;
+        if(mColor[nMode][0] < fValue && fValue <= mColor[nMode][1]){ color = 1; }
+        else if(mColor[nMode][1] < fValue && fValue <= mColor[nMode][2]){ color = 2; }
+        else if(mColor[nMode][2] < fValue && fValue <= mColor[nMode][3]){ color = 3; }
+        else if(mColor[nMode][3] < fValue && fValue <= mColor[nMode][4]){ color = 4; }
+        else if(mColor[nMode][4] < fValue){ color = 5; }
 
         return color;
     }
