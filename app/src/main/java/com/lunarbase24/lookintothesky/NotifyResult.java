@@ -17,8 +17,18 @@ public class NotifyResult {
     private int mTimezone[] = {0, 0, 0, 0};
     private GregorianCalendar mUpdateTime;
 
-    public NotifyResult(){
-        mWidgetID = 0;
+    public NotifyResult(int id){
+        mWidgetID = id;
+    }
+
+    public int getWidgetID(){
+        return mWidgetID;
+    }
+
+    public void reset(){
+        for(int i : mTimezone){
+            i = 0;
+        }
     }
 
 }

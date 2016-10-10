@@ -66,7 +66,7 @@ public class SoraAppWidget extends AppWidgetProvider {
     private static final String ACTION_START_SHARE = "com.lunarbase24.lookintothesky.ACTION_START_SHARE";
     private static final String ACTION_CHANGE_SETTING = "com.lunarbase24.lookintothesky.ACTION_CHANGE_SETTING";
     private final long interval = 60 * 60 * 1000;
-    private long alarmtime = 30 * 60 * 1000;  // アラーム設定分
+    private long mAlarmtime = 30 * 60 * 1000;  // アラーム設定分
 
     public static AppSettings mSettings = new AppSettings();
 
@@ -79,6 +79,8 @@ public class SoraAppWidget extends AppWidgetProvider {
     private static final float mDotY[][] = { {10.0f, 15.0f, 35.0f, 50.0f, 70.0f, 100.0f },
             {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
             {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
+
+    private static NotifyGenerator mNotifyGenerator = null;
 
     // 以下はシステムのタイミングで呼ばれる
     // 最初、ウィジットを画面に配置する際に設定アクティビティよりも先に呼ばれる。
@@ -186,6 +188,9 @@ public class SoraAppWidget extends AppWidgetProvider {
                 soramame.getMstName(), (type == 0 ? "PM2.5" : "   OX"), soramame.getData().get(0).getCalendarString(), widgetText);
 
         // 異常データ通知
+        if(mNotifyGenerator != null){
+            mNotifyGenerator.notify(context, soramame, appWidgetId, type);
+        }
 
         // 計測値にスタイルを適用したいため、以下を使用。
         // "未計測"をイタリックにすると、wrap_contentにて端が表示されないので、スタイルを変更する。
@@ -218,7 +223,9 @@ public class SoraAppWidget extends AppWidgetProvider {
         shareintent.putExtra(Intent.EXTRA_TEXT, strShared);
         shareintent.putExtra(Intent.EXTRA_STREAM, Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +
                 String.format("/soracapture_%d_%d.png", appWidgetId, type)));
-        PendingIntent operation = PendingIntent.getActivity(context, appWidgetId, shareintent, 0);
+        // 以下、最後の引数に（PendingIntent.FLAG_UPDATE_CURRENT）を設定しないと、
+        // strShared文字列が更新されないことが分かった。
+        PendingIntent operation = PendingIntent.getActivity(context, appWidgetId, shareintent, PendingIntent.FLAG_UPDATE_CURRENT);
         image.setOnClickPendingIntent(R.id.shareButton, operation);
         // 更新
         Intent updateIntent = new Intent(context, SoraAppWidget.class);
@@ -247,6 +254,11 @@ public class SoraAppWidget extends AppWidgetProvider {
 // Alarmのサンプルにしたのが以下のコードを書いていた。意味があるのか不明なのでコメント化
 //            if (ACTION_START_MY_ALARM.equals(intent.getAction())) {
 
+            // 初回配置時にIDとデータ種別を保持
+            if (intent.getAction().equals(ACTION_START) ){
+                // 初回時にDBに保存しておく
+                SoramameAccessor.setWidgetID(context, intent.getIntExtra("MstCode", 0), intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
+            }
             // ウィジェットを配置していなければ未処理で終わる
             ComponentName thisWidget = new ComponentName(context, SoraAppWidget.class);
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
@@ -257,6 +269,7 @@ public class SoraAppWidget extends AppWidgetProvider {
             // 設定データ取得
             if(mSettings == null){ mSettings = new AppSettings(); }
             mSettings.getPreference(context);
+            mAlarmtime = mSettings.m_nUpdateTime * 60 * 1000;
 
             // debug start
             Toast toast = Toast.makeText(context, String.format("%s", context.getApplicationInfo().name), Toast.LENGTH_SHORT);
@@ -264,12 +277,14 @@ public class SoraAppWidget extends AppWidgetProvider {
             toast.show();
             // debug end
 
-            alarmtime = mSettings.m_nUpdateTime * 60 * 1000;
-            // 初回配置時にIDとデータ種別を保持
-            if (intent.getAction().equals(ACTION_START) ){
-                // 初回時にDBに保存しておく
-                SoramameAccessor.setWidgetID(context, intent.getIntExtra("MstCode", 0), intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
+            // 通知用インスタンス生成
+            if(mNotifyGenerator == null){
+                mNotifyGenerator = new NotifyGenerator();
             }
+            mNotifyGenerator.setNotifySettings(mSettings.m_bNotify, mSettings.m_nNotifyValue, mSettings.m_nNotifyTimezone);
+            // ここでウィジェット情報（ウィジェットID）を設定する
+            mNotifyGenerator.setWidgetInfo(appWidgetIds);
+
             Intent serviceIntent = new Intent(context, MyService.class);
             context.startService(serviceIntent);
 //            }
@@ -288,9 +303,9 @@ public class SoraAppWidget extends AppWidgetProvider {
         long oneHourAfter = now + interval - now % (interval);
         // 毎指定分(alarmtime)にアラーム
         long lCurrent = now % interval;
-        if( Math.abs(lCurrent - alarmtime) < 1000*60 ){ oneHourAfter = now + interval; }
-        else if(lCurrent < alarmtime){ oneHourAfter = now - lCurrent + alarmtime; }
-        else{ oneHourAfter = now - lCurrent + alarmtime + interval; }
+        if( Math.abs(lCurrent - mAlarmtime) < 1000*60 ){ oneHourAfter = now + interval; }
+        else if(lCurrent < mAlarmtime){ oneHourAfter = now - lCurrent + mAlarmtime; }
+        else{ oneHourAfter = now - lCurrent + mAlarmtime + interval; }
         am.set(AlarmManager.RTC, oneHourAfter, operation);
     }
 
