@@ -63,7 +63,7 @@ public class SoraAppWidgetConfigureActivity extends Activity {
     private Soramame mSoramame;
 
     ArrayList<Soramame> mList;
-    int nDataType = 0;
+    int nDataType = Soramame.SORAMAME_MODE_PM25;
 
     public SoraAppWidgetConfigureActivity() {
         super();
@@ -101,10 +101,10 @@ public class SoraAppWidgetConfigureActivity extends Activity {
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if( i < 0 ){ return ; }
                 if( i == R.id.radioButton ){
-                    nDataType = 0;
+                    nDataType = Soramame.SORAMAME_MODE_PM25;
                 }
                 else if(i == R.id.radioButton2){
-                    nDataType = 1;
+                    nDataType = Soramame.SORAMAME_MODE_OX;
                 }
             }
         });

@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static ArrayList<Soramame> mList;   // 測定局別計測データ
 
-    int mCurrentType = 0;       // 表示データ種別スピナー
+    int mCurrentType = Soramame.SORAMAME_MODE_PM25;       // 表示データ種別スピナー
     int mCurrentDay = 3;        // 表示日数スピナー 値は表示日数、１から７、０は最大と判断。
     int mGraphTransparency = 0;   //
 
@@ -232,13 +232,13 @@ public class MainActivity extends AppCompatActivity {
     // 表示データ種別および日数のスピナー設定
     private void SetSpinner() {
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        mCurrentType = sharedPref.getInt("CurrentType", 0);
+        mCurrentType = sharedPref.getInt("CurrentType", Soramame.SORAMAME_MODE_PM25);
         mCurrentDay = sharedPref.getInt("CurrentDay", 3);
 
         try {
             ArrayList<String> dataList = new ArrayList<String>();
-            dataList.add(getString(R.string.datatype_PM25));
             dataList.add(getString(R.string.datatype_OX));
+            dataList.add(getString(R.string.datatype_PM25));
             dataList.add(getString(R.string.datatype_WS));
             ArrayAdapter<String> pref = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, dataList);
             pref.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

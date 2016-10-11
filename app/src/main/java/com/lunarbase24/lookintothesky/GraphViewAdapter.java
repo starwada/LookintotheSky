@@ -132,15 +132,15 @@ public class GraphViewAdapter extends RecyclerView.Adapter<GraphViewAdapter.View
         holder.date.setText(val.getDateString());
         holder.hour.setText(val.getHourString());
         switch(mMode){
-            case 0:
+            case Soramame.SORAMAME_MODE_PM25:
                 holder.value.setText(val.getPM25String());
                 holder.imageWS.setVisibility(View.INVISIBLE);
                 break;
-            case 1:
+            case Soramame.SORAMAME_MODE_OX:
                 holder.value.setText(val.getOXString());
                 holder.imageWS.setVisibility(View.INVISIBLE);
                 break;
-            case 2:
+            case Soramame.SORAMAME_MODE_WS:
                 // 風向のアイコン用にスペースを入れる
                 holder.value.setText(val.getWSString()+"　");
                 // 静穏の場合

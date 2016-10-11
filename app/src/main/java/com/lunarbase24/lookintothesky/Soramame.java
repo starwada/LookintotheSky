@@ -20,9 +20,13 @@ public class Soramame implements Parcelable{
 
     // 表示区分 OX（光化学オキシダント）PM2.5  WS（風速）
     // GraphFactoryにも同様に定義している
-    private static final float mColor[][] = { {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
+    public static final float mSection[][] = { {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
             {10.0f, 15.0f, 35.0f, 50.0f, 70.0f, 100.0f },
             {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
+
+    public float[][] getSection(){
+        return mSection;
+    }
 
     // そらまめの測定局データ
     public  class SoramameStation {
@@ -190,9 +194,21 @@ public class Soramame implements Parcelable{
             m_nPM25 = pm25;
         }
 
-        public String Format()
+        public String DataFormat(int mode)
         {
-            return String.format("%s:%s", getCalendarString(), getPM25String()) ;
+            String strData = "";
+            switch(mode){
+                case 0:
+                    strData = getOXString();
+                    break;
+                case 1:
+                    strData = getPM25String();
+                    break;
+                case 2:
+                    strData = getWSString();
+                    break;
+            }
+            return String.format("%s:%s", getCalendarString(), strData) ;
         }
 
         public void clearData(){
@@ -400,12 +416,12 @@ public class Soramame implements Parcelable{
     {
         return m_Station.getString();
     }
-    public String getData(int nIndex)
+    public String getData(int mode, int nIndex)
     {
         int nSize = getSize();
         if( nSize < 1 && nSize <= nIndex ){ return ""; }
 
-        return m_aData.get(nIndex).Format() ;
+        return m_aData.get(nIndex).DataFormat(mode) ;
     }
     public SoramameData getSoramameData(int nIndex){
         int nSize = getSize();
@@ -455,11 +471,11 @@ public class Soramame implements Parcelable{
                 break;
         }
         color = 0;
-        if(mColor[nMode][0] < fValue && fValue <= mColor[nMode][1]){ color = 1; }
-        else if(mColor[nMode][1] < fValue && fValue <= mColor[nMode][2]){ color = 2; }
-        else if(mColor[nMode][2] < fValue && fValue <= mColor[nMode][3]){ color = 3; }
-        else if(mColor[nMode][3] < fValue && fValue <= mColor[nMode][4]){ color = 4; }
-        else if(mColor[nMode][4] < fValue){ color = 5; }
+        if(mSection[nMode][0] < fValue && fValue <= mSection[nMode][1]){ color = 1; }
+        else if(mSection[nMode][1] < fValue && fValue <= mSection[nMode][2]){ color = 2; }
+        else if(mSection[nMode][2] < fValue && fValue <= mSection[nMode][3]){ color = 3; }
+        else if(mSection[nMode][3] < fValue && fValue <= mSection[nMode][4]){ color = 4; }
+        else if(mSection[nMode][4] < fValue){ color = 5; }
 
         return color;
     }

@@ -39,4 +39,6 @@
     <string name="configure_graph">グラフ設定</string>
     <string name="notify_timezone">通知時間帯</string>
     <string name="settings_summary_notify_timezone">通知時間帯を設定します</string>
+    <string name="notify_title">注意　空見てごらん</string>
+    <string name="notify_message">設定値を超えました。</string>
 </resources>

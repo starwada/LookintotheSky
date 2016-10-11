@@ -39,4 +39,6 @@
     <string name="configure_graph">Graph Settings</string>
     <string name="notify_timezone">Notify Time Zone</string>
     <string name="settings_summary_notify_timezone">Set Notify Time zone</string>
+    <string name="notify_title">Warning Look into the Sky</string>
+    <string name="notify_message">it is over a setting value.</string>
 </resources>

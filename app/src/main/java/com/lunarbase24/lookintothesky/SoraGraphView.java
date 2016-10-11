@@ -11,7 +11,6 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
-import android.provider.CalendarContract;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -26,6 +25,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+import static com.lunarbase24.lookintothesky.Soramame.SORAMAME_MODE_OX;
+import static com.lunarbase24.lookintothesky.Soramame.SORAMAME_MODE_PM25;
+import static com.lunarbase24.lookintothesky.Soramame.SORAMAME_MODE_WS;
+import static com.lunarbase24.lookintothesky.Soramame.mSection;
 
 /**
  * そらまめ PM2.5測定値用グラフカスタムビュー
@@ -56,15 +59,11 @@ public class SoraGraphView extends View {
     private int[] mGraphBackColor;      // グラフ背景色
 
     private Paint mOX;
-    // 表示区分 PM2.5 OX（光化学オキシダント） WS（風速）
-    private float mDotY[][] = { {10.0f, 15.0f, 35.0f, 50.0f, 70.0f, 100.0f },
-        {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
-        {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
 
     private int mIndex;                     // 強調日時インデックス
     private String mstrValue;
     private int mToastPos[] = { 0,0 };
-    private int mMode;                      // 表示データモード 0 PM2.5/1 OX/2 風速
+    private int mMode;                      // 表示データモード 0 OX/1 OM2.5/2 風速
     private int mDispDay;               // 表示日数 0 全て
     private int mTransparency;
 
@@ -184,15 +183,24 @@ public class SoraGraphView extends View {
         GregorianCalendar curtime = (GregorianCalendar)list.get(0).getDate().clone();
         for( Soramame.SoramameData data : list){
             // それぞれのMAX値を取得
-            if( (float)data.getPM25() > mMax[0] ){ mMax[0] = (float)data.getPM25(); mMaxTime[0] = nCount; }
-            if( data.getOX() > mMax[1] ){ mMax[1] = data.getOX(); mMaxTime[1] = nCount; }
-            if( data.getWS() > mMax[2] ){ mMax[2] = data.getWS(); mMaxTime[2] = nCount; }
+            if( data.getOX() > mMax[SORAMAME_MODE_OX] ){
+                mMax[SORAMAME_MODE_OX] = data.getOX();
+                mMaxTime[SORAMAME_MODE_OX] = nCount;
+            }
+            if( (float)data.getPM25() > mMax[SORAMAME_MODE_PM25] ){
+                mMax[SORAMAME_MODE_PM25] = (float)data.getPM25();
+                mMaxTime[SORAMAME_MODE_PM25] = nCount;
+            }
+            if( data.getWS() > mMax[SORAMAME_MODE_WS] ){
+                mMax[SORAMAME_MODE_WS] = data.getWS();
+                mMaxTime[SORAMAME_MODE_WS] = nCount;
+            }
             // 24時間平均値計算
             // データの連続性は保証されないので、カウントでの判定はだめ。
             if( nCount++ < 24){
-                mAve[0] += (float)data.getPM25();
-                mAve[1] += data.getOX();
-                mAve[2] += data.getWS();
+                mAve[SORAMAME_MODE_PM25] += (float)data.getPM25();
+                mAve[SORAMAME_MODE_OX] += data.getOX();
+                mAve[SORAMAME_MODE_WS] += data.getWS();
             }
 
             // 時間での判定
@@ -263,13 +271,13 @@ public class SoraGraphView extends View {
     private String getSpecString(float mode[]){
         String strSpec = "";
         switch (mMode){
-            case 0:
+            case SORAMAME_MODE_PM25:
                 strSpec = String.format(Locale.JAPANESE, "%.0f μg/m3", mode[mMode]);
                 break;
-            case 1:
+            case SORAMAME_MODE_OX:
                 strSpec = String.format(Locale.JAPANESE, "%.2f ppm", mode[mMode]);
                 break;
-            case 2:
+            case SORAMAME_MODE_WS:
                 strSpec = String.format(Locale.JAPANESE, "%.1f m/s", mode[mMode]);
                 break;
         }
@@ -346,7 +354,7 @@ public class SoraGraphView extends View {
         MainActivity act = (MainActivity) getContext();
         if(act != null) {
             String strMode;
-            strMode = String.format("(%s):", mMode == 0 ? act.getString(R.string.datatype_PM25) : (mMode == 1 ? act.getString(R.string.datatype_OX) : act.getString(R.string.datatype_WS)));
+            strMode = String.format("(%s):", mMode == SORAMAME_MODE_PM25 ? act.getString(R.string.datatype_PM25) : (mMode == SORAMAME_MODE_OX ? act.getString(R.string.datatype_OX) : act.getString(R.string.datatype_WS)));
             act.setShareIntent(mstrValue + strMode + mSoramame.getMstName());
         }
     }
@@ -372,42 +380,36 @@ public class SoraGraphView extends View {
         // グラフ描画
         // グラフ背景
         float y = (float)(paddingTop+contentHeight);
-        float rh = (float)contentHeight/mDotY[mMode][5];
+        float rh = (float)contentHeight/mSection[mMode][5];
 
         // PM2.5/OX/WS
         // ～１０/0.0-0.02/0.2-3.9
-        mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][0], (float)(paddingLeft+contentWidth), y);
-//        mBack.setColor(Color.argb(75, 0, 0, 255));
+        mRect.set( (float)paddingLeft, y-rh*mSection[mMode][0], (float)(paddingLeft+contentWidth), y);
         mBack.setColor(mGraphBackColor[0]);
         mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // １１～１５/0.021-0.04/4.0-6.9
-        mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][1], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][0]);
-//        mBack.setColor(Color.argb(75, 0, 255,255));
+        mRect.set( (float)paddingLeft, y-rh*mSection[mMode][1], (float)(paddingLeft+contentWidth), y-rh*mSection[mMode][0]);
         mBack.setColor(mGraphBackColor[1]);
         mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // １６～３５/0.041-0.06/7.0-9.9
-        mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][2], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][1]);
-//        mBack.setColor(Color.argb(75, 0, 255,128));
+        mRect.set( (float)paddingLeft, y-rh*mSection[mMode][2], (float)(paddingLeft+contentWidth), y-rh*mSection[mMode][1]);
         mBack.setColor(mGraphBackColor[2]);
         mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // ３６～５０/0.061-0.119/10.0-12.9
-        mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][3], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][2]);
-//        mBack.setColor(Color.argb(75, 255, 255,0));
+        mRect.set( (float)paddingLeft, y-rh*mSection[mMode][3], (float)(paddingLeft+contentWidth), y-rh*mSection[mMode][2]);
         mBack.setColor(mGraphBackColor[3]);
         mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // ５１～７０/0.12-0.239/13.0-14.9
-        mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][4], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][3]);
-//        mBack.setColor(Color.argb(75, 255, 128,0));
+        mRect.set( (float)paddingLeft, y-rh*mSection[mMode][4], (float)(paddingLeft+contentWidth), y-rh*mSection[mMode][3]);
         mBack.setColor(mGraphBackColor[4]);
         mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
         // 70-100/0.24-0.34/15.0-25.0
-        mRect.set( (float)paddingLeft, y-rh*mDotY[mMode][5], (float)(paddingLeft+contentWidth), y-rh*mDotY[mMode][4]);
-//        mBack.setColor(Color.argb(75, 255, 0,0));
+        mRect.set( (float)paddingLeft, y-rh*mSection[mMode][5], (float)(paddingLeft+contentWidth), y-rh*mSection[mMode][4]);
         mBack.setColor(mGraphBackColor[5]);
         mBack.setAlpha(mTransparency);
         canvas.drawRect(mRect, mBack);
@@ -422,14 +424,14 @@ public class SoraGraphView extends View {
             y -= (float)contentHeight/5;
             canvas.drawLine(paddingLeft, y, paddingLeft + contentWidth, y, mLine);
             switch(mMode){
-                case 0:
+                case SORAMAME_MODE_PM25:
                     canvas.drawText(String.format("%d", i*20+20), 0, y + mTextHeight/2, mTextPaint);
                     break;
-                case 1:
-                    canvas.drawText(String.format("%.2f", i*mDotY[mMode][5]/5.0f+mDotY[mMode][5]/5.0f), 0, y + mTextHeight/2, mTextPaint);
+                case SORAMAME_MODE_OX:
+                    canvas.drawText(String.format("%.2f", i*mSection[mMode][5]/5.0f+mSection[mMode][5]/5.0f), 0, y + mTextHeight/2, mTextPaint);
                     break;
-                case 2:
-                    canvas.drawText(String.format("%.1f", i*mDotY[mMode][5]/5.0f+mDotY[mMode][5]/5.0f), 0, y + mTextHeight/2, mTextPaint);
+                case SORAMAME_MODE_WS:
+                    canvas.drawText(String.format("%.1f", i*mSection[mMode][5]/5.0f+mSection[mMode][5]/5.0f), 0, y + mTextHeight/2, mTextPaint);
                     break;
             }
         }
@@ -448,6 +450,7 @@ public class SoraGraphView extends View {
             y = (float)(paddingTop + contentHeight);
 
             int nCount=0;
+            int hourofday = 0;
             int nHour = 0;
             float doty = 0f;
             float fradius = 3.0f;
@@ -456,31 +459,31 @@ public class SoraGraphView extends View {
                 if( mDispDay != 0 && nCount > mDispDay*24 ){ break; }
                 fradius = 3.0f;
                 switch(mMode){
-                    case 0:
-                        doty = y-(data.getPM25() * (float)contentHeight/mDotY[mMode][5]);
+                    case SORAMAME_MODE_PM25:
+                        doty = y-(data.getPM25() * (float)contentHeight/mSection[mMode][5]);
                         break;
-                    case 1:
-                        doty = y-(data.getOX() * (float)contentHeight/mDotY[mMode][5]);
+                    case SORAMAME_MODE_OX:
+                        doty = y-(data.getOX() * (float)contentHeight/mSection[mMode][5]);
                         break;
-                    case 2:
-                        doty = y-(data.getWS() * (float)contentHeight/mDotY[mMode][5]);
+                    case SORAMAME_MODE_WS:
+                        doty = y-(data.getWS() * (float)contentHeight/mSection[mMode][5]);
                         break;
                 }
 
-                if( (mMode == 0 && data.getPM25() > 0) ||
-                        (mMode == 1 && data.getOX() > 0.0) ||
-                        (mMode == 2 && data.getWS() > 0.0 )) {
+                if( (mMode == SORAMAME_MODE_PM25 && data.getPM25() > 0) ||
+                        (mMode == SORAMAME_MODE_OX && data.getOX() > 0.0) ||
+                        (mMode == SORAMAME_MODE_WS && data.getWS() > 0.0 )) {
                     if( nCount == mIndex) {
                         fradius = 12.0f;
                         mstrValue = data.getCalendarString() + " ";
                         switch(mMode){
-                            case 0:
+                            case SORAMAME_MODE_PM25:
                                 mstrValue += data.getPM25String();
                                 break;
-                            case 1:
+                            case SORAMAME_MODE_OX:
                                 mstrValue += data.getOXString();
                                 break;
-                            case 2:
+                            case SORAMAME_MODE_WS:
                                 mstrValue += data.getWSString();
                                 break;
                         }
@@ -490,7 +493,8 @@ public class SoraGraphView extends View {
                     canvas.drawCircle(x, doty, fradius, mDot);
                 }
                 // 時間軸描画
-                if( data.getDate().get(Calendar.HOUR_OF_DAY) == 0 ){
+                hourofday = data.getDate().get(Calendar.HOUR_OF_DAY);
+                if(hourofday == 0 ){
                     canvas.drawLine(x, paddingTop, x, contentHeight + paddingTop, mLine);
                     if(0 < mDispDay && mDispDay < 6) {
                         nHour=0;
@@ -508,7 +512,7 @@ public class SoraGraphView extends View {
                                 x - mHourTextWidth[nHour++] / 2, paddingTop + mTextHeight, mTextPaint);
                     }
                 }
-                if( data.getDate().get(Calendar.HOUR_OF_DAY) == 1 ){
+                if(hourofday == 1 ){
                     // 日付描画
                     canvas.drawText(String.format("%d日", data.getDate().get(Calendar.DAY_OF_MONTH)),
                             x, paddingTop + contentHeight + mTextHeight, mTextPaint);

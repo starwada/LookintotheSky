@@ -26,11 +26,15 @@ public class NotifyResult {
         return mWidgetID;
     }
 
+    public void setTimezone(int timezone){
+        reset(timezone);
+    }
+
     public boolean checktimezone(GregorianCalendar now){
         boolean bOk = false;
         int index = now.get(Calendar.HOUR_OF_DAY)/6;
         if(index >= 0 && index < 4){
-            if(mTimezone[index] == 1){
+            if(mTimezone[index] > 0){
                 bOk = true;
                 mTimezone[index] = 0;
             }

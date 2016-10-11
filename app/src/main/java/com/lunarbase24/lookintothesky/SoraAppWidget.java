@@ -74,13 +74,8 @@ public class SoraAppWidget extends AppWidgetProvider {
         return mSettings;
     }
 
-    // 表示区分 PM2.5 OX（光化学オキシダント） WS（風速）
-    // GraphFactoryにも同様に定義している
-    private static final float mDotY[][] = { {10.0f, 15.0f, 35.0f, 50.0f, 70.0f, 100.0f },
-            {0.02f, 0.04f, 0.06f, 0.12f, 0.24f, 0.34f },
-            {4.0f, 7.0f, 10.0f, 13.0f, 15.0f, 25.0f}};
-
     private static NotifyGenerator mNotifyGenerator = null;
+    private static int[] mGraphBackColor;      // グラフ背景色
 
     // 以下はシステムのタイミングで呼ばれる
     // 最初、ウィジットを画面に配置する際に設定アクティビティよりも先に呼ばれる。
@@ -114,6 +109,8 @@ public class SoraAppWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
+        // リソース（array）から色設定を取得
+        mGraphBackColor = context.getResources().getIntArray(R.array.graph_color_rgb);
         // 初回に１度だけタイマー起動
 //        if(timer == null) {
 //            timer = new Timer();
@@ -166,15 +163,15 @@ public class SoraAppWidget extends AppWidgetProvider {
         float fSize = 48.0f;
         boolean flag = true;
         switch(type){
-            case 0:
+            case Soramame.SORAMAME_MODE_PM25:
                 widgetText = soramame.getData().get(0).getPM25String();
-                nColor = soramame.getColor(Soramame.SORAMAME_MODE_PM25, 0);
+                nColor = mGraphBackColor[soramame.getColorIndex(Soramame.SORAMAME_MODE_PM25, 0)];
                 flag = soramame.getData().get(0).isValidatePM25();
                 break;
-            case 1:
+            case Soramame.SORAMAME_MODE_OX:
                 fSize = 40.0f;
                 widgetText = soramame.getData().get(0).getOXString();
-                nColor = soramame.getColor(Soramame.SORAMAME_MODE_OX, 0);
+                nColor = mGraphBackColor[soramame.getColorIndex(Soramame.SORAMAME_MODE_OX, 0)];
                 flag = soramame.getData().get(0).isValidateOX();
                 break;
         }
@@ -185,12 +182,7 @@ public class SoraAppWidget extends AppWidgetProvider {
         }
         String strShared;   // 共有時の文字列　観測局名 データ種別 日付 値 Twitterを想定
         strShared = String.format(Locale.JAPANESE, "%s %s\n%s %s #空見てごらん",
-                soramame.getMstName(), (type == 0 ? "PM2.5" : "   OX"), soramame.getData().get(0).getCalendarString(), widgetText);
-
-        // 異常データ通知
-        if(mNotifyGenerator != null){
-            mNotifyGenerator.notify(context, soramame, appWidgetId, type);
-        }
+                soramame.getMstName(), (type == Soramame.SORAMAME_MODE_PM25 ? "PM2.5" : "   OX"), soramame.getData().get(0).getCalendarString(), widgetText);
 
         // 計測値にスタイルを適用したいため、以下を使用。
         // "未計測"をイタリックにすると、wrap_contentにて端が表示されないので、スタイルを変更する。
@@ -257,7 +249,12 @@ public class SoraAppWidget extends AppWidgetProvider {
             // 初回配置時にIDとデータ種別を保持
             if (intent.getAction().equals(ACTION_START) ){
                 // 初回時にDBに保存しておく
-                SoramameAccessor.setWidgetID(context, intent.getIntExtra("MstCode", 0), intent.getIntExtra("WidgetID", 0), intent.getIntExtra("DataType", 0));
+                SoramameAccessor.setWidgetID(
+                        context,
+                        intent.getIntExtra("MstCode", 0),
+                        intent.getIntExtra("WidgetID", 0),
+                        intent.getIntExtra("DataType", Soramame.SORAMAME_MODE_PM25)
+                );
             }
             // ウィジェットを配置していなければ未処理で終わる
             ComponentName thisWidget = new ComponentName(context, SoraAppWidget.class);
@@ -281,9 +278,9 @@ public class SoraAppWidget extends AppWidgetProvider {
             if(mNotifyGenerator == null){
                 mNotifyGenerator = new NotifyGenerator();
             }
-            mNotifyGenerator.setNotifySettings(mSettings.m_bNotify, mSettings.m_nNotifyValue, mSettings.m_nNotifyTimezone);
-            // ここでウィジェット情報（ウィジェットID）を設定する
-            mNotifyGenerator.setWidgetInfo(appWidgetIds);
+            // ここで通知情報、ウィジェット情報（ウィジェットID）を設定する
+            // 関数内にて日付が変わった際の更新処理も行う。
+            mNotifyGenerator.setNotify(mSettings.m_bNotify, mSettings.m_nNotifyValue, mSettings.m_nNotifyTimezone, appWidgetIds);
 
             Intent serviceIntent = new Intent(context, MyService.class);
             context.startService(serviceIntent);
@@ -400,10 +397,14 @@ public class SoraAppWidget extends AppWidgetProvider {
                     // 同じ測定局は一度に処理をする
                     int[] appWidgetIds = SoramameAccessor.getWidgetIDByMst(MyService.this, soramame.getMstCode());
                     for (int i = 0; i < appWidgetIds.length; i++) {
-                        Bitmap graph = GraphFactory.drawGraph(soramame, appWidgetIds[i], appWidgetIds[i + 1], mSettings);
+                        Bitmap graph = GraphFactory.drawGraph(mGraphBackColor, soramame, appWidgetIds[i], appWidgetIds[i+1], mSettings);
                         // ここでウィジット更新
                         AppWidgetManager manager = AppWidgetManager.getInstance(MyService.this);
                         updateAppWidget(MyService.this, manager, soramame, appWidgetIds[i], appWidgetIds[i + 1]);
+                        // 異常データ通知
+                        if(mNotifyGenerator != null){
+                            mNotifyGenerator.notify(MyService.this, soramame, appWidgetIds[i], appWidgetIds[i+1]);
+                        }
                         i++;
                     }
                 }catch(NullPointerException e){
