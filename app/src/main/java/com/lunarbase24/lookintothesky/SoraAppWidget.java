@@ -109,8 +109,6 @@ public class SoraAppWidget extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
-        // リソース（array）から色設定を取得
-        mGraphBackColor = context.getResources().getIntArray(R.array.graph_color_rgb);
         // 初回に１度だけタイマー起動
 //        if(timer == null) {
 //            timer = new Timer();
@@ -322,6 +320,8 @@ public class SoraAppWidget extends AppWidgetProvider {
 //                outfile.write(String.format( Locale.ENGLISH, "%s flag:%d startId:%d\n", now.toString(), flags, startId).getBytes());
 //                outfile.close();
 //                Log.d("onStartCommand", String.format("%d", mSettings.m_nDispHour));
+                // リソース（array）から色設定を取得
+                mGraphBackColor = this.getResources().getIntArray(R.array.graph_color_rgb);
 
                 // 同じ測定局のデータは１度で済ませたい。
                 // ここで、DBのウィジットテーブルに問い合わせして、ウィジット情報を取得。

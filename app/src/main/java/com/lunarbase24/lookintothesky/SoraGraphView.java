@@ -47,23 +47,23 @@ public class SoraGraphView extends View {
     private Soramame mSoramame;     // 測定局のPM2.5データ
 
     private float mMax[] = new float[3];  // 表示データのMAX
-    private int mMaxTime[] = new int[3];    // 最大値の時間（インデックス）
+    private GregorianCalendar mMaxTime[] = new GregorianCalendar[3];    // 最大値の時間（インデックス）
     private float mAve[] = new float[3];    // 表示データの24時間平均値
     private Paint mBack;
     private Paint mLine ;
     private Paint mDot ;
     private Paint mHourLine;
     private Path mHourPath;
-    private float mHourTextWidth[] = new float[4];
-    private RectF mRect;
-    private int[] mGraphBackColor;      // グラフ背景色
-
     private Paint mOX;
+    private RectF mRect;
+
+    private float mHourTextWidth[] = new float[4];
+    private int[] mGraphBackColor;      // グラフ背景色
 
     private int mIndex;                     // 強調日時インデックス
     private String mstrValue;
     private int mToastPos[] = { 0,0 };
-    private int mMode;                      // 表示データモード 0 OX/1 OM2.5/2 風速
+    private int mMode;                      // 表示データモード 0 OX/1 PM2.5/2 風速
     private int mDispDay;               // 表示日数 0 全て
     private int mTransparency;
 
@@ -116,7 +116,6 @@ public class SoraGraphView extends View {
             invalidateTextPaintAndMeasurements();
 
             mMax[0] = mMax[1] = mMax[2] = 0.0f;
-            mMaxTime[0] = mMaxTime[1] = mMaxTime[2] = 0;
             mAve[0] = mAve[1] = mAve[2] = 0.0f;
             mBack = new Paint();
             mBack.setColor(Color.argb(75, 0, 0, 255));
@@ -173,7 +172,6 @@ public class SoraGraphView extends View {
         if( sora.getSize() < 1 ){ return ; }
 
         mMax[0] = mMax[1] = mMax[2] = 0.0f;
-        mMaxTime[0] = mMaxTime[1] = mMaxTime[2] = 0;
         mAve[0] = mAve[1] = mAve[2] = 0.0f;
         mSoramame = new Soramame(sora.getMstCode(), sora.getMstName(), sora.getAddress());
         ArrayList<Soramame.SoramameData> list = sora.getData();
@@ -185,15 +183,15 @@ public class SoraGraphView extends View {
             // それぞれのMAX値を取得
             if( data.getOX() > mMax[SORAMAME_MODE_OX] ){
                 mMax[SORAMAME_MODE_OX] = data.getOX();
-                mMaxTime[SORAMAME_MODE_OX] = nCount;
+                mMaxTime[SORAMAME_MODE_OX] = data.getDate();
             }
             if( (float)data.getPM25() > mMax[SORAMAME_MODE_PM25] ){
                 mMax[SORAMAME_MODE_PM25] = (float)data.getPM25();
-                mMaxTime[SORAMAME_MODE_PM25] = nCount;
+                mMaxTime[SORAMAME_MODE_PM25] = data.getDate();
             }
             if( data.getWS() > mMax[SORAMAME_MODE_WS] ){
                 mMax[SORAMAME_MODE_WS] = data.getWS();
-                mMaxTime[SORAMAME_MODE_WS] = nCount;
+                mMaxTime[SORAMAME_MODE_WS] = data.getDate();
             }
             // 24時間平均値計算
             // データの連続性は保証されないので、カウントでの判定はだめ。
@@ -259,7 +257,12 @@ public class SoraGraphView extends View {
     // 最大値
     public String getMaxString(){
         ArrayList<Soramame.SoramameData> list = mSoramame.getData();
-        return String.format(Locale.JAPANESE, "最高値：%s \n(%s)", getSpecString(mMax), list.get(mMaxTime[mMode]).getCalendarString());
+        return String.format(Locale.JAPANESE, "最高値：%s \n(%s/%s/%s %s時)",
+                getSpecString(mMax),
+                mMaxTime[mMode].get(Calendar.YEAR),
+                mMaxTime[mMode].get(Calendar.MONTH)+1,
+                mMaxTime[mMode].get(Calendar.DAY_OF_MONTH),
+                mMaxTime[mMode].get(Calendar.HOUR_OF_DAY));
     }
 
     // 平均値
