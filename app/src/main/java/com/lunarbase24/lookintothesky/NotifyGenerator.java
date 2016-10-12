@@ -173,7 +173,7 @@ public class NotifyGenerator {
         notifyintent.putExtra("stationcode", soramame.getMstCode());
         notifyintent.putExtra("type", type);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notifyintent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, result.getNotifyId(), notifyintent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(pendingIntent);
 
