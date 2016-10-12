@@ -200,12 +200,15 @@ public class Soramame implements Parcelable{
             switch(mode){
                 case 0:
                     strData = getOXString();
+                    strData += "(OX)";
                     break;
                 case 1:
                     strData = getPM25String();
+                    strData += "(PM2.5)";
                     break;
                 case 2:
                     strData = getWSString();
+                    strData += "(WS)";
                     break;
             }
             return String.format("%s:%s", getCalendarString(), strData) ;

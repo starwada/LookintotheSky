@@ -9,22 +9,23 @@ import java.util.GregorianCalendar;
  * データメンバ
  * ウィジェットID
  * 時間帯フラグ
- * 更新日時
  */
 
 public class NotifyResult {
 
     private int mWidgetID;
     private int mTimezone[] = {0, 0, 0, 0};
-    private GregorianCalendar mUpdateTime;
+    private int mId;            // 通知ID 通知毎にIDがある
 
-    public NotifyResult(int id){
-        mWidgetID = id;
+    public NotifyResult(int widget, int id){
+        mWidgetID = widget;
+        mId = id;
     }
 
     public int getWidgetID(){
         return mWidgetID;
     }
+    public int getNotifyId(){ return mId; }
 
     public void setTimezone(int timezone){
         reset(timezone);
@@ -32,6 +33,7 @@ public class NotifyResult {
 
     public boolean checktimezone(GregorianCalendar now){
         boolean bOk = false;
+
         int index = now.get(Calendar.HOUR_OF_DAY)/6;
         if(index >= 0 && index < 4){
             if(mTimezone[index] > 0){

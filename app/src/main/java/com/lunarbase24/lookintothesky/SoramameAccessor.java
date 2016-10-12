@@ -237,6 +237,7 @@ public class SoramameAccessor {
                 }
             }
             c.close();
+            Db.close();
         } catch (SQLiteException e) {
             e.printStackTrace();
         }

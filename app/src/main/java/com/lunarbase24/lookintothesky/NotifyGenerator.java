@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
@@ -29,11 +30,14 @@ public class NotifyGenerator {
     private boolean mNotifyFlag;        // 通知フラグ
     private int mNotifyValueIndex;      // 通知しきい値インデックス
     private int mTimezone;              // 通知時間帯
+    private GregorianCalendar mUpdateTime = null;
+    private int mNotifyID;
 
     public NotifyGenerator(){
         mNotifyFlag = true;
         mNotifyValueIndex = 0;
         mTimezone = 0;
+        mNotifyID = 0;
         if(mNotifyList == null){
             mNotifyList = new ArrayList<NotifyResult>();
         }
@@ -53,6 +57,20 @@ public class NotifyGenerator {
         update();
     }
 
+    // 通知情報削除
+    // widgetid:削除対象ウィジェットID
+    public void removeNotify(int widgetid){
+        if(mNotifyList == null || mNotifyList.size() < 1){
+            return ;
+        }
+        for(NotifyResult result : mNotifyList){
+            if(result.getWidgetID() == widgetid){
+                mNotifyList.remove(result);
+                break;
+            }
+        }
+    }
+
     // 通知設定データ
     private void setNotifySettings(boolean flag, int index, int timezone){
         mNotifyFlag = flag;
@@ -61,10 +79,10 @@ public class NotifyGenerator {
     }
 
     // 通知対象ウィジェット設定
-    // WIdgetIds:ウィジェット番号
+    // WidgetIds:ウィジェット番号
     private void setWidgetInfo(int[] WidgetIds){
         for(int id: WidgetIds) {
-            NotifyResult result = new NotifyResult(id);
+            NotifyResult result = new NotifyResult(id, mNotifyID++);
 
             if (!mNotifyList.contains(result)) {
                 result.setTimezone(mTimezone);
@@ -77,8 +95,30 @@ public class NotifyGenerator {
     // 通知時間帯は1日内での設定で、日付が変わると再度初期化する必要がある。
     // よって、現在時間より日付が変わったと判断されると、通知情報（NotifyResult）の
     // 通知時間帯データを初期化する。
+    // 日付が変わったとの判断は、NotifyResultに前回の日時を保持しておき、
+    // 現在日時の日付の差分より行う。
     private void update(){
+        GregorianCalendar now = new GregorianCalendar(Locale.JAPAN);
+        // 初回で更新
+        int prev = -1;
+        if(mUpdateTime != null){
+            prev = mUpdateTime.get(Calendar.DAY_OF_MONTH);
+        }
 
+        int today = now.get(Calendar.DAY_OF_MONTH);
+        if(prev != today){
+            reset();
+        }
+    }
+
+    // 通知時間帯一斉リセット
+    private void reset(){
+        if(mNotifyList == null || mNotifyList.size() < 1){
+            return ;
+        }
+        for(NotifyResult result : mNotifyList){
+            result.reset(mTimezone);
+        }
     }
 
     private NotifyResult getResult(int appWidgetId){
@@ -113,7 +153,7 @@ public class NotifyGenerator {
             return;
         }
 
-        String msg = String.format("%s\n%s\n%s",
+        String msg = String.format("%s %s %s",
                 soramame.getMstName(), soramame.getData(type, 0), context.getString(R.string.notify_message));
         // 通知発生
         NotificationManager NotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -128,20 +168,22 @@ public class NotifyGenerator {
 
         Intent notifyintent = new Intent(context, SoraGraphActivity.class);
         notifyintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // 測定局コード、データ種別をIntentに設定する
+        notifyintent.putExtra("stationcode", soramame.getMstCode());
+        notifyintent.putExtra("type", type);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notifyintent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(pendingIntent);
 
-        int id=0;
-        NotificationManager.notify(id, builder.build());
+        NotificationManager.notify(result.getNotifyId(), builder.build());
 
     }
 
     // 通知判定
     // result:通知結果情報
     // data:計測データ
-    // type:データタイプ 0 PM2.5/1
+    // type:データタイプ 0 OX/1 PM2.5
     // 現在時間と通知時間帯とのカウント数をチェック
     // 閾値のチェック
     private boolean judge(NotifyResult result, Soramame data, int type){
@@ -149,24 +191,15 @@ public class NotifyGenerator {
         // 通知時間帯チェック
         GregorianCalendar now = new GregorianCalendar(Locale.JAPAN);
 
-        bOk = result.checktimezone(now);
-        if(!bOk){
-            return bOk;
+        if(!result.checktimezone(now)){
+            return false;
         }
 
-        int mode = 0;
-        switch(type){
-            case 0:
-                mode = Soramame.SORAMAME_MODE_PM25;
-                break;
-            case 1:
-                mode = Soramame.SORAMAME_MODE_OX;
-                break;
-        }
         // 閾値チェック
-        if(mNotifyValueIndex <= data.getColorIndex(mode, 0)){
+        if(mNotifyValueIndex <= data.getColorIndex(type, 0)){
             bOk = true;
         }
+        mUpdateTime = now;
 
         return bOk;
     }

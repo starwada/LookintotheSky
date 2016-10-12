@@ -103,6 +103,10 @@ public class SoraAppWidget extends AppWidgetProvider {
                 image.delete();
             }
             SoramameAccessor.deleteWidgetID(context, appWidgetIds[i]);
+            // 通知用からも削除する
+            if(mNotifyGenerator != null){
+                mNotifyGenerator.removeNotify(appWidgetIds[i]);
+            }
         }
     }
 
@@ -196,7 +200,9 @@ public class SoraAppWidget extends AppWidgetProvider {
 
         // ここは、テキストをクリックしたらMainActivityが起動する仕組みを設定している。
         // Create an Intent to launch ExampleActivity
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, SoraGraphActivity.class);
+        intent.putExtra("stationcode", soramame.getMstCode());
+        intent.putExtra("type", type);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, 0);
         // Get the layout for the App Widget and attach an on-click listener
         // to the button
