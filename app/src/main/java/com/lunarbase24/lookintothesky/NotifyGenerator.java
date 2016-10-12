@@ -167,7 +167,8 @@ public class NotifyGenerator {
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
 
         Intent notifyintent = new Intent(context, SoraGraphActivity.class);
-        notifyintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notifyintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                            Intent.FLAG_ACTIVITY_CLEAR_TASK);
         // 測定局コード、データ種別をIntentに設定する
         notifyintent.putExtra("stationcode", soramame.getMstCode());
         notifyintent.putExtra("type", type);
