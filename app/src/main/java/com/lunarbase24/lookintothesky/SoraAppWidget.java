@@ -273,7 +273,7 @@ public class SoraAppWidget extends AppWidgetProvider {
             mAlarmtime = mSettings.m_nUpdateTime * 60 * 1000;
 
             // debug start
-            Toast toast = Toast.makeText(context, String.format("%s", context.getApplicationInfo().name), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(context, String.format("%s", context.getString(R.string.app_name)), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
             // debug end
