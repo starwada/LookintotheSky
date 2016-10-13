@@ -167,18 +167,17 @@ public class NotifyGenerator {
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
 
         Intent notifyintent = new Intent(context, SoraGraphActivity.class);
-        notifyintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                                            Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        notifyintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // 測定局コード、データ種別をIntentに設定する
         notifyintent.putExtra("stationcode", soramame.getMstCode());
         notifyintent.putExtra("type", type);
-
+        // ここの第2引数に違う値を設定しないと、複数通知にてアクションが区別されない。
+        // 通知IDと同じものを設定する。
         PendingIntent pendingIntent = PendingIntent.getActivity(context, result.getNotifyId(), notifyintent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(pendingIntent);
 
         NotificationManager.notify(result.getNotifyId(), builder.build());
-
     }
 
     // 通知判定

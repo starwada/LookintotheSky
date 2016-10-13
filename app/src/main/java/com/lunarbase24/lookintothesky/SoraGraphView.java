@@ -1,5 +1,6 @@
 package com.lunarbase24.lookintothesky;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -11,6 +12,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -354,11 +356,19 @@ public class SoraGraphView extends View {
 
     // ShareActionProvider用にIntentを設定する
     public void setShareIntent(){
-        MainActivity act = (MainActivity) getContext();
+        AppCompatActivity act = (AppCompatActivity) getContext();
         if(act != null) {
+            String classname = act.getLocalClassName();
             String strMode;
             strMode = String.format("(%s):", mMode == SORAMAME_MODE_PM25 ? act.getString(R.string.datatype_PM25) : (mMode == SORAMAME_MODE_OX ? act.getString(R.string.datatype_OX) : act.getString(R.string.datatype_WS)));
-            act.setShareIntent(mstrValue + strMode + mSoramame.getMstName());
+            if(classname == "MainActivity") {
+                MainActivity activity = (MainActivity)act;
+                activity.setShareIntent(mstrValue + strMode + mSoramame.getMstName());
+            }
+            else if(classname == "SoraGraphActivity"){
+                SoraGraphActivity activity = (SoraGraphActivity)act;
+                activity.setShareIntent(mstrValue + strMode + mSoramame.getMstName());
+            }
         }
     }
 

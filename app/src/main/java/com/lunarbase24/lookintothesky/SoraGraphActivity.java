@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -68,6 +69,17 @@ public class SoraGraphActivity extends AppCompatActivity {
         new SoraTask().execute(type);
     }
 
+    public void setShareIntent(String strText) {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.setPackage("com.twitter.android");
+        shareIntent.setType("image/jpeg");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/capture.jpeg"));
+        shareIntent.putExtra(Intent.EXTRA_TEXT, strText);
+        shareIntent.setType("text/plain");
+        startActivity(shareIntent);
+    }
+
     private class SoraTask extends AsyncTask<Integer, Void, Void> {
         ProgressDialog mProgressDialog;
         int count = 0;
@@ -99,6 +111,7 @@ public class SoraGraphActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
 
+            // 最新のデータを表示する。
             Soramame data = mList.get(0);
             final SoraGraphView sora = (SoraGraphView) findViewById(R.id.soragraph);
             sora.setData(data);
@@ -112,13 +125,18 @@ public class SoraGraphActivity extends AppCompatActivity {
                         int sum = event.getPointerCount();
                         sora.Touch(px);
                     }
-                    else if(event.getActionMasked() == MotionEvent.ACTION_UP){
-                        Touch(sora);
+                    // ACTION_DOWNしか通知されないので苦肉の策。
+                    else if(event.getActionMasked() == MotionEvent.ACTION_UP ||
+                            event.getActionMasked() == MotionEvent.ACTION_DOWN){
+                        float px = event.getX(0);
+                        int sum = event.getPointerCount();
+                        sora.Touch(px);
+                        TouchGraph(sora);
                     }
                     return false;
                 }
             });
-            Touch(sora);
+            TouchGraph(sora);
 
             TextView station = (TextView)findViewById(R.id.MstName);
             station.setText(data.getMstName());
@@ -156,7 +174,7 @@ public class SoraGraphActivity extends AppCompatActivity {
         }
 
         // グラフタッチ処理
-        private void Touch(SoraGraphView sora){
+        private void TouchGraph(SoraGraphView sora){
             Soramame.SoramameData val = sora.getPosData();
             TextView date = (TextView)findViewById(R.id.date);
             date.setText(val.getDateString());
