@@ -577,4 +577,77 @@ public class SoramameAccessor {
 
         return rc;
     }
+
+	// 測定データ削除
+	// 日付指定にて古いデータを削除し、データベースを圧縮する
+    public static int deleteSoramameByDate(Context context, String sDate){
+        int rc = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+        try {
+            // まず、DBをチェックする。
+            Db = DbHelper.getWritableDatabase();
+            if (!Db.isOpen()) {
+                return -1;
+            }
+
+            String[] selectionArgs = {sDate};
+            rc = Db.delete(SoramameContract.FeedEntry.DATA_TABLE_NAME,
+                    SoramameContract.FeedEntry.COLUMN_NAME_DATE + " = ?", selectionArgs);
+            Db.close();
+        }
+        catch(SQLiteException e){
+            e.printStackTrace();
+        }
+
+        return rc;
+    }
+
+	// DBデータをCSVに出力する
+	// 出力先：ダウンロード\lookintothesky\lookintothesky_201707.csv
+	// DIRECTORY_DOWNLOADS
+	// 先頭に測定局データを出力し、その後測定データを出力する
+	// 測定局データ部
+	// 測定局名,測定局コード,住所,県,OX,PM2.5,風速
+	// 測定データ部
+	// 測定局コード,日付,OX値,PM2.5値,風向,風速
+    public static int outputDBToCSV(Context context) {
+        int rc = 0;
+        SoramameSQLHelper DbHelper = new SoramameSQLHelper(context);
+        SQLiteDatabase Db = null;
+
+        try {
+            // まず、DBをチェックする。
+            Db = DbHelper.getReadableDatabase();
+            if (!Db.isOpen()) {
+                return -1;
+            }
+
+            // CSVファイル作成
+            StringBuilder csvLine = new StringBuilder();
+
+            // 測定局データ出力
+            String strWhereArg[] = {String.valueOf(nCode)};
+            // 測定局コードにてソート
+            Cursor c = Db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
+                    SoramameContract.FeedEntry.COLUMN_NAME_SEL + " = 1", strWhereArg, null, null, null);
+            rc = c.getCount();
+            if (rc > 0) {
+                if (c.moveToFirst()) {
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_STATION)));
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS)));
+                }
+            }
+            c.close();
+
+            // 測定データ出力
+            // 測定局コードおよび日付にてソート
+
+            Db.close();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+        return rc;
+    }
+
 }
