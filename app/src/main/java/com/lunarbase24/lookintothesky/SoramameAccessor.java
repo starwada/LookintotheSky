@@ -627,7 +627,7 @@ public class SoramameAccessor {
             StringBuilder csvLine = new StringBuilder();
 
             // 測定局データ出力
-            String strWhereArg[] = {String.valueOf(nCode)};
+            //String strWhereArg[] = {String.valueOf(nCode)};
             // 測定局コードにてソート
             Cursor c = Db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
                     SoramameContract.FeedEntry.COLUMN_NAME_SEL + " = 1", strWhereArg, null, null, null);
