@@ -627,21 +627,46 @@ public class SoramameAccessor {
             StringBuilder csvLine = new StringBuilder();
 
             // 測定局データ出力
-            //String strWhereArg[] = {String.valueOf(nCode)};
+            String strWhereArg[] = {"1"};
+        	ArrayList<String> ArgList = new ArrayList<String>;
+            
             // 測定局コードにてソート
+        	csvLine.append("測定局名,測定局コード,住所,県コード,OX,PM2.5,風速\n");
             Cursor c = Db.query(SoramameContract.FeedEntry.TABLE_NAME, null,
-                    SoramameContract.FeedEntry.COLUMN_NAME_SEL + " = 1", strWhereArg, null, null, null);
+                    SoramameContract.FeedEntry.COLUMN_NAME_SEL + " = ?", strWhereArg, null, null, null);
             rc = c.getCount();
             if (rc > 0) {
                 if (c.moveToFirst()) {
-                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_STATION)));
-                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS)));
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_STATION)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_CODE)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_ADDRESS)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_PREFCODE)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_OX)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_PM25)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_WD)) + "\n");
+                	
+                	ArgList.add(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_CODE)));
                 }
             }
             c.close();
 
             // 測定データ出力
             // 測定局コードおよび日付にてソート
+        	csvLine.append("測定局コード,日付,OX値,PM2.5値,風向,風速\n");
+            c = Db.query(SoramameContract.FeedEntry.DATA_TABLE_NAME, null,
+                    SoramameContract.FeedEntry.COLUMN_NAME_CODE + " = ?", strWhereArg, null, null, null);
+            rc = c.getCount();
+            if (rc > 0) {
+                if (c.moveToFirst()) {
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_CODE)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_DATE)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_OX)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_PM25)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_WD)) + ",");
+                    csvLine.append(c.getString(c.getColumnIndexOrThrow(SoramameContract.FeedEntry.COLUMN_NAME_WS)) + "\n");
+                }
+            }
+            c.close();
 
             Db.close();
         } catch (SQLiteException e) {
