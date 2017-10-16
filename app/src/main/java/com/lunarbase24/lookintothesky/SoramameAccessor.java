@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 
 import org.jsoup.Jsoup;
@@ -12,10 +13,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Wada on 2016/07/29.
@@ -591,6 +597,7 @@ public class SoramameAccessor {
                 return -1;
             }
 
+        	// 日付指定は月単位（2017 07 *）で
             String[] selectionArgs = {sDate};
             rc = Db.delete(SoramameContract.FeedEntry.DATA_TABLE_NAME,
                     SoramameContract.FeedEntry.COLUMN_NAME_DATE + " = ?", selectionArgs);
@@ -628,7 +635,7 @@ public class SoramameAccessor {
 
             // 測定局データ出力
             String strWhereArg[] = {"1"};
-        	ArrayList<String> ArgList = new ArrayList<String>;
+        	ArrayList<String> ArgList = new ArrayList<String>();
             
             // 測定局コードにてソート
         	csvLine.append("測定局名,測定局コード,住所,県コード,OX,PM2.5,風速\n");
@@ -669,7 +676,22 @@ public class SoramameAccessor {
             c.close();
 
             Db.close();
+
+            // CSV出力
+            FileOutputStream out = null;
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + String.format("/sora.csv"));
+
+            out = context.openFileOutput(file.getPath(), MODE_PRIVATE );
+            out.write(csvLine.toString().getBytes());
+            out.close();
+
         } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+        catch( FileNotFoundException e){
+            e.printStackTrace();
+        }
+        catch ( IOException e){
             e.printStackTrace();
         }
         return rc;
